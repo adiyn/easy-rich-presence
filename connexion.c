@@ -4,11 +4,6 @@
 #include <Lmcons.h>
 #include "connexion.h"
 
-#define DIS_PIPE_ADDR 			"\\\\.\\pipe\\discord-ipc-0"
-#define KRED          			"\x1B[31m"
-#define KGRN  					"\x1B[32m"
-#define KNRM  					"\x1B[0m"
-
 #pragma push(pack, 1)
 typedef struct PacketHeader
 {
