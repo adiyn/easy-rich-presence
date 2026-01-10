@@ -1,19 +1,60 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/socket.h>
-#include <sys/un.h>
 #include <string.h>
+#include <Lmcons.h>
+#include "connexion.h"
 
-#define APPID "114326150163386784"
+#define DIS_APP_ID 				"1143261501633867846"
+#define DIS_PIPE_ADDR 			"\\\\.\\pipe\\discord-ipc-0"
+#define KRED          			"\x1B[31m"
+#define KGRN  					"\x1B[32m"
+#define KNRM  					"\x1B[0m"
 
-// note for self : pragma tells the compiler sth
-// and here it just tells him to push in packs of 1 byte
-#pragma pack(push, 1)
-struct PacketHeader {
-	int opcode; // 0 is handshake and 1 is frame
-	int oplenght; // json size
+#pragma push(pack, 1)
+typedef struct PacketHeader
+{
+	int opcode;
+	int oplength;
+} PacketHeader;
+#pragma pop(pack);
+
+void HandShank(HANDLE hPipe)
+{	// TODO !!!!
+    // 1. make the JSON to send
+    // 2. gill header
+    // 3. send in hPipe :3
+    printf("Sending handshake request...\n"); 
 }
-#pragma pack(pop)
-//
 
-//TODO : connexion function to discord 
+HANDLE ConnexionDiscord()
+{
+	HANDLE hipe = CreateFileA(DIS_PIPE_ADDR, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+	
+	if (hipe == INVALID_HANDLE_VALUE) {
+        return NULL;
+    }
+    return hipe;
+}
+
+int main ()
+{
+	char username[UNLEN+1];
+	DWORD u_len = UNLEN+1;
+	HANDLE connect = NULL;
+	printf("Attempting connexion to discord pipe...\n");
+	unsigned long int attempts = 10;
+	do
+	{
+		connect = ConnexionDiscord();
+		attempts--;
+		Sleep(69);
+	} while (connect == NULL && attempts > 0);
+	if (attempts == 0)
+	{	
+		GetUserName(username, &u_len);
+		printf("%sConnection terminated. I'm sorry to interrupt you, '%s%s%s', \nif you still even remember that name, But I'm afraid \nyou've been misinformed. You are not here to receive a gift,\nnor have you been called here by the individual you assume, \nalthough, you have indeed been called. You have all been called here, \ninto a labyrinth of sounds and smells, misdirection and misfortune. \nA labyrinth with no exit, a maze with no prize. \nYou don't even realize that you are trapped.\n\n\t%sthis is a silly copypasta message, the program failed.%s\n\n", KGRN, KRED, username, KGRN, KRED, KNRM);
+		return EXIT_FAILURE;
+	}
+	printf("Connexion successfully established.\n");
+	return EXIT_SUCCESS;
+}
