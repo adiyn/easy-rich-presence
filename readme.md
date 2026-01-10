@@ -48,4 +48,4 @@ This project is licensed under the APACHE 2.0 Licence.
 
 ## Acknowledgments
 
-* [inspired by](https://github.com/dhanax26/C---Discord-RPC)
+* [inspired by](https://github.com/discord/discord-rpc)
