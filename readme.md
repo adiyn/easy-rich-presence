@@ -1,6 +1,6 @@
 # dis rpC!
 
-A discord rpC to make it easier to share what you're doign with people !
+A discord rich presence tool to make it easier to share what you're doign with people !
 
 ## Description
 
