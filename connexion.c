@@ -4,7 +4,6 @@
 #include <Lmcons.h>
 #include "connexion.h"
 
-#define DIS_APP_ID 				"1143261501633867846"
 #define DIS_PIPE_ADDR 			"\\\\.\\pipe\\discord-ipc-0"
 #define KRED          			"\x1B[31m"
 #define KGRN  					"\x1B[32m"
@@ -21,7 +20,7 @@ typedef struct PacketHeader
 void HandShank(HANDLE hPipe)
 {	// TODO !!!!
     // 1. make the JSON to send
-    // 2. gill header
+    // 2. fill header
     // 3. send in hPipe :3
     printf("Sending handshake request...\n"); 
 }
