@@ -31,7 +31,9 @@ download the standalone app.exe executable and double clic to launch.
 ## Help
 
 ```
-If you encounter any issues send me an email at ad1yn@proton.me with '[DIS_RPC - HELP]' as an object.  you can contact me via my mail : ```ad1yn@proton.me```
+If you encounter any issues send me an email at ad1yn@proton.me with the subject '[DIS_RPC - SUBJECT_HERE]'.
+Adding 'URGENT' or 'CRITICAL' or anything with hopes to get a reply faster is futile as I am quite slow...
+You can contact me via my mail : ad1yn@proton.me
 ```
 
 ## Author
