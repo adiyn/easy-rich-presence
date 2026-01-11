@@ -15,6 +15,6 @@ HANDLE ConnexionDiscord();
 
 void SendHandshake(HANDLE hPipe);
 // sends the handshake to discord
-//@param: where to send it
+//@param: the pipe it's sent in
 
 #endif
