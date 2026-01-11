@@ -11,7 +11,7 @@
 #define KNRM  					"\x1B[0m"
 
 HANDLE ConnexionDiscord();
-// connects to the discord pipe file
+// connects to the discord pipe thing
 
 void SendHandshake(HANDLE hPipe);
 // sends the handshake to discord
