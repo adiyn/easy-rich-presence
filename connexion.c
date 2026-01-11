@@ -33,7 +33,6 @@ HANDLE ConnexionDiscord()
 int main ()
 {
 	char username[UNLEN+1];
-	DWORD u_len = UNLEN+1;
 	HANDLE connect = NULL;
 	printf("Attempting connexion to discord pipe...\n");
 	unsigned long int attempts = 10;
