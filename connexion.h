@@ -2,6 +2,18 @@
 #define CONNEXION_H 
 
 #include <windows.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <Lmcons.h>
+
+#pragma pack(push, 1)
+typedef struct PacketHeader
+{
+	int opcode;
+	int oplength;
+} PacketHeader;
+#pragma pack(pop)
 
 #define DIS_APP_ID              "1143261501633867846" // public app id
 #define DIS_PIPE_ADDR 			"\\\\.\\pipe\\discord-ipc-0" // where the ppipe is in the ram (i think ?)
@@ -11,10 +23,7 @@
 #define KNRM  					"\x1B[0m"
 
 HANDLE ConnexionDiscord();
-// connects to the discord pipe thing
-
 void SendHandshake(HANDLE hPipe);
-// sends the handshake to discord
-//@param: the pipe it's sent in
+void UpdatePresence(HANDLE hPipe);
 
 #endif

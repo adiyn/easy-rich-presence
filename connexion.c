@@ -1,23 +1,51 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <Lmcons.h>
 #include "connexion.h"
 
-#pragma push(pack, 1)
-typedef struct PacketHeader
+void SendHandshake(HANDLE hPipe)
 {
-	int opcode;
-	int oplength;
-} PacketHeader;
-#pragma pop(pack);
+    char json_buffer[512];
+    sprintf(json_buffer, "{\"v\": 1, \"client_id\": \"%s\"}", DIS_APP_ID);
+    int json_len = strlen(json_buffer);
 
-void HandShank(HANDLE hPipe)
-{	// TODO !!!!
-    // 1. make the JSON to send
-    // 2. fill header
-    // 3. send in hPipe :3
-    printf("Sending handshake request...\n"); 
+    PacketHeader header;
+    header.opcode = 0;
+    header.oplength = json_len;
+    DWORD bytesWritten;
+
+    WriteFile(hPipe, &header, sizeof(PacketHeader), &bytesWritten, NULL);
+    WriteFile(hPipe, json_buffer, json_len, &bytesWritten, NULL);
+
+    printf("Handshank request sent ! (Opcode: %d, Len: %d)\n", header.opcode, header.oplength);
+    printf("Payload: %s\n", json_buffer);
+}
+
+void UpdatePresence(HANDLE hPipe)
+{
+    char json_buffer[1024];
+    int APP_PID = GetCurrentProcessId();
+
+    sprintf(json_buffer, 
+        "{"
+            "\"cmd\": \"SET_ACTIVITY\"," 
+            "\"args\": {"
+                "\"pid\": %d,"
+                "\"activity\": {"
+                    "\"details\": \"test\","
+                    "\"state\": \"CCCCCC\""
+                "}"
+            "},"
+            "\"nonce\": \"1\""
+        "}", 
+        APP_PID
+    );
+	int json_len = strlen(json_buffer);
+
+    PacketHeader header;
+    header.opcode = 1;
+    header.oplength = json_len;
+    DWORD bytesWritten;
+	
+    WriteFile(hPipe, &header, sizeof(PacketHeader), &bytesWritten, NULL);
+    WriteFile(hPipe, json_buffer, json_len, &bytesWritten, NULL);
 }
 
 HANDLE ConnexionDiscord()
@@ -28,26 +56,4 @@ HANDLE ConnexionDiscord()
         return NULL;
     }
     return hipe;
-}
-
-int main ()
-{
-	char username[UNLEN+1];
-	HANDLE connect = NULL;
-	printf("Attempting connexion to discord pipe...\n");
-	int attempts = 10;
-	do
-	{
-		connect = ConnexionDiscord();
-		attempts--;
-		Sleep(69);
-	} while (connect == NULL && attempts > 0);
-	if (attempts == 0)
-	{	
-		GetUserName(username, &u_len);
-		printf("%sConnection terminated. I'm sorry to interrupt you, '%s%s%s', \nif you still even remember that name, But I'm afraid \nyou've been misinformed. You are not here to receive a gift,\nnor have you been called here by the individual you assume, \nalthough, you have indeed been called. You have all been called here, \ninto a labyrinth of sounds and smells, misdirection and misfortune. \nA labyrinth with no exit, a maze with no prize. \nYou don't even realize that you are trapped.\n\n\t%sthis is a silly copypasta message, the program failed.%s\n\n", KGRN, KRED, username, KGRN, KRED, KNRM);
-		return EXIT_FAILURE;
-	}
-	printf("Connexion successfully established.\n");
-	return EXIT_SUCCESS;
 }
