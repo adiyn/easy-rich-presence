@@ -20,12 +20,12 @@ Simple rpc app made in C, will detect software running on your computer, fully c
 
 ### Linux
 ```
-download the latest linux release and run the app executable. 
+All you will need to do is download the latest linux release and run the app. 
 ```
 
 ### Windows
 ```
-download the standalone app.exe executable and double clic to launch.
+All you will need to do is download the standalone app.exe executable and double clic to launch the app.
 ```
 
 ## Help
@@ -33,7 +33,7 @@ download the standalone app.exe executable and double clic to launch.
 ```
 If you encounter any issues send me an email at ad1yn@proton.me with the subject '[DIS_RPC - SUBJECT_HERE]'.
 Adding 'URGENT' or 'CRITICAL' or anything with hopes to get a faster reply is futile as I am quite slow...
-You can contact me via my mail : ad1yn@proton.me
+You can contact me at 'ad1yn@proton.me'
 ```
 
 ## Author
