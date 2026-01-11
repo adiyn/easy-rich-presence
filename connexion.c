@@ -35,7 +35,7 @@ int main ()
 	char username[UNLEN+1];
 	HANDLE connect = NULL;
 	printf("Attempting connexion to discord pipe...\n");
-	unsigned long int attempts = 10;
+	int attempts = 10;
 	do
 	{
 		connect = ConnexionDiscord();
