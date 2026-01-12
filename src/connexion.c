@@ -89,7 +89,7 @@ void UpdatePresence(void* hPipe)
     WriteFile(hPipe, json_buffer, json_len, &bytesWritten, NULL);
 }
 
-void* ConnexionDiscord()
+void* ConnectionDiscord()
 {
 	void* hipe = CreateFileA(DIS_PIPE_ADDR, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
 	
