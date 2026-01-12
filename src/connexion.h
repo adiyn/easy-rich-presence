@@ -5,7 +5,8 @@
 #include <string.h>
 #include <stdio.h>
 
-#define DIS_PIPE_ADDR       "1143261501633867846" 
+#define DIS_PIPE_ADDR       "\\\\.\\pipe\\discord-ipc-0"
+#define DIS_APP_ID          "1143261501633867846"
 #define KRED                "\x1B[31m"
 #define KGRN                "\x1B[32m"
 #define KNRM                "\x1B[0m"

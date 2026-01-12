@@ -6,8 +6,8 @@
 #include <windows.h>
 #include <Lmcons.h>
 
-static HANDLE stdoutHandle;
-static DWORD outModeInit;
+static void* stdoutHandle;
+static unsigned long outModeInit;
 
 #pragma pack(push, 1)
 typedef struct PacketHeader
@@ -18,14 +18,14 @@ typedef struct PacketHeader
 #pragma pack(pop)
 
 void SetupConsole(void) {
-    DWORD outMode = 0;
+    unsigned long outMode = 0;
     stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
     if(stdoutHandle == INVALID_HANDLE_VALUE) exit(GetLastError());
     if(!GetConsoleMode(stdoutHandle, &outMode)) exit(GetLastError());
 
     outModeInit = outMode;
-    
+    // Enable ANSI escape codes 
     outMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
 
     if(!SetConsoleMode(stdoutHandle, outMode)) exit(GetLastError());   
@@ -44,13 +44,13 @@ void RestoreConsole(void) {
 void SendHandshake(void* hPipe)
 {
     char json_buffer[512];
-    sprintf(json_buffer, "{\"v\": 1, \"client_id\": \"%s\"}", DIS_PIPE_ADDR);
+    sprintf(json_buffer, "{\"v\": 1, \"client_id\": \"%s\"}", DIS_APP_ID);
     int json_len = strlen(json_buffer);
 
     PacketHeader header;
     header.opcode = 0;
     header.oplength = json_len;
-    DWORD bytesWritten;
+    unsigned long bytesWritten;
 
     WriteFile(hPipe, &header, sizeof(PacketHeader), &bytesWritten, NULL);
     WriteFile(hPipe, json_buffer, json_len, &bytesWritten, NULL);
@@ -83,7 +83,7 @@ void UpdatePresence(void* hPipe)
     PacketHeader header;
     header.opcode = 1;
     header.oplength = json_len;
-    DWORD bytesWritten;
+    unsigned long bytesWritten;
 	
     WriteFile(hPipe, &header, sizeof(PacketHeader), &bytesWritten, NULL);
     WriteFile(hPipe, json_buffer, json_len, &bytesWritten, NULL);
@@ -91,7 +91,7 @@ void UpdatePresence(void* hPipe)
 
 void* ConnexionDiscord()
 {
-	HANDLE hipe = CreateFileA(DIS_PIPE_ADDR, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+	void* hipe = CreateFileA(DIS_PIPE_ADDR, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
 	
 	if (hipe == INVALID_HANDLE_VALUE) {
         return NULL;

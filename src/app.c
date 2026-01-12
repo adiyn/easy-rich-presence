@@ -44,7 +44,7 @@ int main ()
     {
         connect = ConnexionDiscord();
         attempts--;
-        Sleep(100); 
+        Sleep(69); 
     } while (connect == NULL && attempts > 0);
 
     if (attempts == 0)
