@@ -21,10 +21,10 @@
 #undef DrawText
 #undef DrawTextEx
 
-#include "raylib.h"
+#include ".\src\raylib.h"
 #define RAYGUI_IMPLEMENTATION
-#include "raygui.h"
-#include "connexion.h"
+#include ".\src\raygui.h"
+#include ".\src\connexion.h"
 
 int main ()
 {
