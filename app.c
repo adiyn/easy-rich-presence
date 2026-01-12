@@ -8,6 +8,7 @@ int main ()
 	// TODO : dropdown app menu for rpc
 	// TODO : fetch statuses like "is the window focused " "what is user doing on the app"...
 	// TODO : when app is closed, minimise to tray, to not pollute when alt tabbing
+	// TODO : add possibility to customize the status with a custom image ? or just text xd
 	DWORD u_len = UNLEN+1;
 	char username[u_len];
 	HANDLE connect = NULL;
