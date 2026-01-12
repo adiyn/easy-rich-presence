@@ -1,25 +1,34 @@
+#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+#endif
+
 #include "connexion.h"
+#include <windows.h>
+#include <Lmcons.h>
+
+static HANDLE stdoutHandle;
+static DWORD outModeInit;
+
+#pragma pack(push, 1)
+typedef struct PacketHeader
+{
+	int opcode;
+	int oplength;
+} PacketHeader;
+#pragma pack(pop)
 
 void SetupConsole(void) {
     DWORD outMode = 0;
     stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
-    if(stdoutHandle == INVALID_HANDLE_VALUE) {
-        exit(GetLastError());
-    }
-    
-    if(!GetConsoleMode(stdoutHandle, &outMode)) {
-        exit(GetLastError());
-    }
+    if(stdoutHandle == INVALID_HANDLE_VALUE) exit(GetLastError());
+    if(!GetConsoleMode(stdoutHandle, &outMode)) exit(GetLastError());
 
     outModeInit = outMode;
     
-    // Enable ANSI escape codes
     outMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
 
-    if(!SetConsoleMode(stdoutHandle, outMode)) {
-        exit(GetLastError());
-    }   
+    if(!SetConsoleMode(stdoutHandle, outMode)) exit(GetLastError());   
 }
 
 void RestoreConsole(void) {
@@ -32,10 +41,10 @@ void RestoreConsole(void) {
     }
 }
 
-void SendHandshake(HANDLE hPipe)
+void SendHandshake(void* hPipe)
 {
     char json_buffer[512];
-    sprintf(json_buffer, "{\"v\": 1, \"client_id\": \"%s\"}", DIS_APP_ID);
+    sprintf(json_buffer, "{\"v\": 1, \"client_id\": \"%s\"}", DIS_PIPE_ADDR);
     int json_len = strlen(json_buffer);
 
     PacketHeader header;
@@ -50,7 +59,7 @@ void SendHandshake(HANDLE hPipe)
     printf("Payload: %s\n", json_buffer);
 }
 
-void UpdatePresence(HANDLE hPipe)
+void UpdatePresence(void* hPipe)
 {
     char json_buffer[1024];
     int APP_PID = GetCurrentProcessId();
@@ -80,7 +89,7 @@ void UpdatePresence(HANDLE hPipe)
     WriteFile(hPipe, json_buffer, json_len, &bytesWritten, NULL);
 }
 
-HANDLE ConnexionDiscord()
+void* ConnexionDiscord()
 {
 	HANDLE hipe = CreateFileA(DIS_PIPE_ADDR, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
 	
