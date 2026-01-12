@@ -2,7 +2,7 @@
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
 
-#include ".\src\connexion.h"
+#include ".\src\connection.h"
 #include <windows.h>
 #include <Lmcons.h>
 

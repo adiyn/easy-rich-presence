@@ -24,7 +24,7 @@
 #include ".\src\raylib.h"
 #define RAYGUI_IMPLEMENTATION
 #include ".\src\raygui.h"
-#include ".\src\connexion.h"
+#include ".\src\connection.h"
 
 int main ()
 {
