@@ -1,7 +1,13 @@
 #include "connexion.h"
+#include "raylib.h"
 
 int main ()
 {
+	
+	// TODO : basic raylib UI (the ourple onee :3)
+	// TODO : dropdown app menu for rpc
+	// TODO : fetch statuses like "is the window focused " "what is user doing on the app"...
+	// TODO : when app is closed, minimise to tray, to not pollute when alt tabbing
 	DWORD u_len = UNLEN+1;
 	char username[u_len];
 	HANDLE connect = NULL;
