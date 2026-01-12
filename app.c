@@ -4,8 +4,8 @@
 int main ()
 {
 	
-	// TODO : basic raylib UI (the ourple onee :3)
-	// TODO : dropdown app menu for rpc
+	// TODO : basic raylib UI (the purple one :3)
+	// TODO : dropdown menu to choose which app to display the status of
 	// TODO : fetch statuses like "is the window focused " "what is user doing on the app"...
 	// TODO : when app is closed, minimise to tray, to not pollute when alt tabbing
 	// TODO : add possibility to customize the status with a custom image ? or just text xd
