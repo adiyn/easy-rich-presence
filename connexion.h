@@ -27,8 +27,9 @@ typedef struct PacketHeader
 #define KGRN  			    "\x1B[32m"
 #define KNRM  		    	"\x1B[0m"
 
+void SetupConsole();
+void RestoreConsole();
 HANDLE ConnexionDiscord();
 void SendHandshake(HANDLE hPipe);
 void UpdatePresence(HANDLE hPipe);
-
 #endif
