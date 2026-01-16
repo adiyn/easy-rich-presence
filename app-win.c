@@ -41,7 +41,7 @@ int main ()
     DWORD u_len = UNLEN+1;
     char username[u_len];
     void* connect = NULL;
-    printf("Connexion au pipe Discord...\n");
+    printf("Connecting to discord pipe...\n");
     
     int attempts = 10;
     do
@@ -62,7 +62,7 @@ int main ()
         return EXIT_FAILURE;
     }
 
-    printf("Connexion reussie.\n");
+    printf("Connection established..\n");
     SendHandshake(connect);
     Sleep(1000);
     UpdatePresence(connect);
