@@ -2,9 +2,7 @@
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
 
-#include ".\src\connection.h"
-#include <windows.h>
-#include <Lmcons.h>
+#include ".\src\connection-win.h"
 
 static void* stdoutHandle;
 static unsigned long outModeInit;
@@ -44,14 +42,16 @@ void RestoreConsole(void) {
 void SendHandshake(void* hPipe)
 {
     char json_buffer[512];
+    // Init payload
     sprintf(json_buffer, "{\"v\": 1, \"client_id\": \"%s\"}", DIS_APP_ID);
     int json_len = strlen(json_buffer);
 
+    // Init header
     PacketHeader header;
     header.opcode = 0;
     header.oplength = json_len;
     unsigned long bytesWritten;
-
+    // Send em
     WriteFile(hPipe, &header, sizeof(PacketHeader), &bytesWritten, NULL);
     WriteFile(hPipe, json_buffer, json_len, &bytesWritten, NULL);
 
@@ -74,7 +74,7 @@ void UpdatePresence(void* hPipe)
                     "\"state\": \"CCCCCC\""
                 "}"
             "},"
-            "\"nonce\": \"1\""
+            "\"nonce\": \"1\"" // my "unique ID", required by discord
         "}", 
         APP_PID
     );

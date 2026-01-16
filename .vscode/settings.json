@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "connection-win.h": "c",
+        "stdio.h": "c",
+        "lmcons.h": "c",
+        "gui-win.h": "c"
+    }
+}

@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <windows.h>
+#include <stdbool.h>
 
 #define DIS_PIPE_ADDR       "\\\\.\\pipe\\discord-ipc-0" // memory adress of pipe
 #define DIS_APP_ID          "1143261501633867846" // public app id
