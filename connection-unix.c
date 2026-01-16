@@ -4,7 +4,6 @@
 
 #include ".\src\connection.h"
 #include <unistd.h>
-#include <Lmcons.h>
 
 static void* stdoutHandle;
 static unsigned long outModeInit;
