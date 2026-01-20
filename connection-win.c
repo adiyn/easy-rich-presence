@@ -2,7 +2,7 @@
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
 
-#include ".\src\connection-win.h"
+#include "src/connection-win.h"
 
 static void* stdoutHandle;
 static unsigned long outModeInit;
@@ -71,7 +71,7 @@ void UpdatePresence(void* hPipe)
                 "\"pid\": %d,"
                 "\"activity\": {"
                     "\"details\": \"test\","
-                    "\"state\": \"CCCCCC\""
+                    "\"state\": \"CCCCCC\""Z
                 "}"
             "},"
             "\"nonce\": \"1\"" // my "unique ID", required by discord

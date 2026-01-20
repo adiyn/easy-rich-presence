@@ -2,8 +2,7 @@
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 #endif
 
-#include ".\src\connection-unix.h"
-#include <unistd.h>
+#include "src/connection-unix.h"
 
 static void* stdoutHandle;
 static unsigned long outModeInit;
@@ -15,3 +14,69 @@ typedef struct PacketHeader
 	int oplength;
 } PacketHeader;
 #pragma pack(pop)
+
+// todo : redo everything
+
+void SendHandshake(void* hPipe)
+{
+    char json_buffer[512];
+    // Init payload
+    sprintf(json_buffer, "{\"v\": 1, \"client_id\": \"%s\"}", DIS_APP_ID);
+    int json_len = strlen(json_buffer);
+
+    // Init header
+    PacketHeader header;
+    header.opcode = 0;
+    header.oplength = json_len;
+    unsigned long bytesWritten;
+    // Send em
+
+    // todo : replace writefile with socket() and connect() from sys/socket.h ?
+    WriteFile(hPipe, &header, sizeof(PacketHeader), &bytesWritten, NULL);
+    WriteFile(hPipe, json_buffer, json_len, &bytesWritten, NULL);
+
+    printf("Handshank request sent ! (Opcode: %d, Len: %d)\n", header.opcode, header.oplength);
+    printf("Payload: %s\n", json_buffer);
+}
+
+void UpdatePresence(void* hPipe)
+{
+    char json_buffer[1024];
+    int APP_PID = GetCurrentProcessId(); // change that
+
+    sprintf(json_buffer, 
+        "{"
+            "\"cmd\": \"SET_ACTIVITY\"," 
+            "\"args\": {"
+                "\"pid\": %d,"
+                "\"activity\": {"
+                    "\"details\": \"test\","
+                    "\"state\": \"linux > windaube\""
+                "}"
+            "},"
+            "\"nonce\": \"1\"" // my "unique ID", required by discord
+        "}", 
+        APP_PID
+    );
+	int json_len = strlen(json_buffer);
+
+    PacketHeader header;
+    header.opcode = 1;
+    header.oplength = json_len;
+    unsigned long bytesWritten;
+
+	// todo : replace writefile with socket() and connect() from sys/socket.h ?
+    WriteFile(hPipe, &header, sizeof(PacketHeader), &bytesWritten, NULL);
+    WriteFile(hPipe, json_buffer, json_len, &bytesWritten, NULL);
+}
+
+void* ConnectionDiscord()
+{
+    // todod : replace createfilea 
+	void* hipe = CreateFileA(DIS_PIPE_ADDR, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+	
+	if (hipe == INVALID_HANDLE_VALUE) {
+        return NULL;
+    }
+    return hipe;
+}
