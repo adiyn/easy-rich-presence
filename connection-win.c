@@ -71,7 +71,7 @@ void UpdatePresence(void* hPipe)
                 "\"pid\": %d,"
                 "\"activity\": {"
                     "\"details\": \"test\","
-                    "\"state\": \"CCCCCC\""Z
+                    "\"state\": \"CCCCCC\""
                 "}"
             "},"
             "\"nonce\": \"1\"" // my "unique ID", required by discord

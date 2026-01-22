@@ -23,9 +23,7 @@ int main ()
 
     SetupConsole(); 
     // SAMPLE FROM RAYGUI GIT
-    InitWindow(400, 200, "raygui - controls test suite");
-    SetTargetFPS(60);
-
+    
     bool showMessageBox = false;
 
     DWORD u_len = UNLEN+1;
