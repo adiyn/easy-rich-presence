@@ -18,15 +18,11 @@ Simple rpc app made in C, will detect software running on your computer, fully c
 
 ### Executing program
 
-```
-Get the compiled app file for Linux on the latest release and for windows get the app.exe.
-```
+* Get the compiled app file for Linux on the latest release and for windows get the app.exe.
 
 ## Help
 
-```
-If you encounter any issues open one.
-```
+* If you encounter any issues open one.
 
 ## Author
 
