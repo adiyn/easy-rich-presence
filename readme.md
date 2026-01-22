@@ -25,8 +25,7 @@ Get the compiled app file for Linux on the latest release and for windows get th
 ## Help
 
 ```
-If you encounter any issues send me an email at ad1yn@proton.me with the subject '[DIS_RPC - SUBJECT_HERE]'.
-Adding 'URGENT' or 'CRITICAL' or anything with hopes to get a faster reply is futile as I am quite slow...
+If you encounter any issues open one.
 ```
 
 ## Author
