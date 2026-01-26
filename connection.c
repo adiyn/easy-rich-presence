@@ -85,7 +85,7 @@ void* ConnectionDiscord()
 #elif _WIN32
 #include ".\src\connection.h"
 
-static void* stdoutHandle;
+static HANDLE stdoutHandle;
 static unsigned long outModeInit;
 
 #pragma pack(push, 1)
@@ -120,7 +120,7 @@ void RestoreConsole(void) {
     }
 }
 
-void SendHandshake(void* hPipe)
+void SendHandshake(HANDLE hPipe)
 {
     char json_buffer[512];
     // Init payload
@@ -140,7 +140,7 @@ void SendHandshake(void* hPipe)
     printf("Payload: %s\n", json_buffer);
 }
 
-void UpdatePresence(void* hPipe)
+void UpdatePresence(HANDLE hPipe)
 {
     char json_buffer[1024];
     int APP_PID = GetCurrentProcessId();
@@ -170,14 +170,20 @@ void UpdatePresence(void* hPipe)
     WriteFile(hPipe, json_buffer, json_len, &bytesWritten, NULL);
 }
 
-void* ConnectionDiscord()
+HANDLE ConnectionDiscord()
 {
-	void* hipe = CreateFileA(DIS_PIPE_ADDR, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+	HANDLE hipe = CreateFileA(DIS_PIPE_ADDR, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
 	
 	if (hipe == INVALID_HANDLE_VALUE) {
         return NULL;
     }
     return hipe;
 }
+
+void get_procs()
+{
+    Enum
+}
+
 #endif
 #endif
