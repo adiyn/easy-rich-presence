@@ -1,4 +1,7 @@
-#include ".\src\connection-win.h"
+#ifdef __linux__
+
+#elif _WIN32
+#include ".\src\connection.h"
 int main ()
 {
 	// TODO : Simple terminal UI
@@ -41,3 +44,5 @@ int main ()
     RestoreConsole();
     return EXIT_SUCCESS;
 }
+
+#endif
