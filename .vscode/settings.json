@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "connection-win.h": "c",
+        "string.h": "c"
+    }
+}
