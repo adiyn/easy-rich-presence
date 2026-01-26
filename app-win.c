@@ -1,28 +1,10 @@
-#define WIN32_LEAN_AND_MEAN
-#define NOGDI             
-#define NOUSER
-
-#undef CloseWindow
-#undef ShowCursor
-#undef Rectangle
-#undef PlaySound
-#undef LoadImage
-#undef DrawText
-#undef DrawTextEx
-
-#include "src/gui-win.h"
 #include ".\src\connection-win.h"
-
 int main ()
 {
-	// TODO : basic raylib UI (the purple one :3)
-	// TODO : dropdown menu to choose which app to display the status of
-	// TODO : fetch statuses like "is the window focused " "what is user doing on the app"...
-	// TODO : when app is closed, minimise to tray, to not pollute when alt tabbing
-	// TODO : add possibility to customize the status with a custom image ? or just text xd
+	// TODO : Simple terminal UI
+	// TODO : Possibility to customize the status with a custom image, custom title...
 
     SetupConsole(); 
-    // SAMPLE FROM RAYGUI GIT
     
     bool showMessageBox = false;
 
