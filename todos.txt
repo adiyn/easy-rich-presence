@@ -1,0 +1,7 @@
+makefile
+terminal ui
+show running apps
+select app
+fill what's asked, default is " "
+
+if i feel like it : full blown app
