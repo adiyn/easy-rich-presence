@@ -4,7 +4,7 @@ A discord rich presence tool to make it easier to share what you're doign with p
 
 ## Description
 
-Simple rpc app made in C, will detect software running on your computer, fully customisable status, and automations (afk, doing something specific in app...). Closing it sends it to the tray / minimises it so it doesn't pollute when you do alt+tab 'n all.
+Simple rpc CLI app.
 
 ## Getting Started
 
