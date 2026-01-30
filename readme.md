@@ -14,11 +14,11 @@ Simple rpc app made in C, will detect software running on your computer, fully c
 
 ### Installing
 
-* Download the latest release accordingly to your needs.
+* Download the latest releasefor ur os :3
 
 ### Executing program
 
-* Get the compiled app file for Linux on the latest release and for windows get the app.exe.
+* get the compiled app thingy
 
 ## Help
 
