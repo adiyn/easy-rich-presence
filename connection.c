@@ -73,7 +73,7 @@ void UpdatePresence(void* hPipe)
 
 void* ConnectionDiscord()
 {
-    // todod : replace createfilea 
+    // todo : replace createfilea 
 	void* hipe = CreateFileA(DIS_PIPE_ADDR, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
 	
 	if (hipe == INVALID_HANDLE_VALUE) {
@@ -81,20 +81,18 @@ void* ConnectionDiscord()
     }
     return hipe;
 }
-
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 #elif _WIN32
 #include ".\src\connection.h"
-
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 static HANDLE stdoutHandle;
 static unsigned long outModeInit;
 
-#pragma pack(push, 1)
 typedef struct PacketHeader
 {
 	int opcode;
 	int oplength;
 } PacketHeader;
-#pragma pack(pop)
 
 void SetupConsole(void) {
     unsigned long outMode = 0;
@@ -111,7 +109,7 @@ void SetupConsole(void) {
 }
 
 void RestoreConsole(void) {
-    // Reset colors
+    // Reset color
     printf("\x1b[0m");  
     
     // Reset console mode
@@ -132,7 +130,8 @@ void SendHandshake(HANDLE hPipe)
     header.opcode = 0;
     header.oplength = json_len;
     unsigned long bytesWritten;
-    // Send em
+    
+    // Send it
     WriteFile(hPipe, &header, sizeof(PacketHeader), &bytesWritten, NULL);
     WriteFile(hPipe, json_buffer, json_len, &bytesWritten, NULL);
 
@@ -182,7 +181,7 @@ HANDLE ConnectionDiscord()
 
 void get_procs()
 {
-    Enum
+    // TODO : do the do to do the do so it does the do done
 }
 
 #endif
