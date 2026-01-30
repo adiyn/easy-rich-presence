@@ -1,4 +1,3 @@
-
 CC = gcc
 CFLAGS = -I./src -Wall
 OBJ = app.o connection.o
