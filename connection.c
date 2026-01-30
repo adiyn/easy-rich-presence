@@ -62,7 +62,7 @@ void SendHandshake(HANDLE hPipe)
     header.oplength = json_len;
     unsigned long bytesWritten;
     
-    // Send it
+    // Send
     WriteFile(hPipe, &header, sizeof(PacketHeader), &bytesWritten, NULL);
     WriteFile(hPipe, json_buffer, json_len, &bytesWritten, NULL);
 
@@ -85,8 +85,8 @@ void UpdatePresence(HANDLE hPipe)
                     "\"state\": \"CCCCCC\""
                 "}"
             "},"
-            "\"nonce\": \"1\"" // my "unique ID", required by discord
-        "}", 
+            "\"nonce\": \"1\""
+        "}",
         APP_PID
     );
 	int json_len = strlen(json_buffer);
@@ -112,7 +112,7 @@ HANDLE ConnectionDiscord()
 
 void get_procs()
 {
-    // TODO : do the do to do the do so it does the do done
+    
 }
 
 #endif
