@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -I./src -Wall
+CFLAGS = -L./src -Wall
 OBJ = app.o connection.o
 
 all: app
