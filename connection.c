@@ -18,6 +18,7 @@ typedef struct PacketHeader
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 static HANDLE stdoutHandle;
 static unsigned int oldCodePage;
+static unsigned long outModeInit;
 
 typedef struct PacketHeader
 {
@@ -27,7 +28,6 @@ typedef struct PacketHeader
 
 void SetupConsole(void) {   
     unsigned long outMode = 0;
-    static unsigned long outModeInit;
     stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
     if(stdoutHandle == INVALID_HANDLE_VALUE) exit(GetLastError());

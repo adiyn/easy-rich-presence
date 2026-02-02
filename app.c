@@ -4,13 +4,10 @@
 #include ".\src\connection.h"
 int main ()
 {
-	// TODO : Simple terminal UI
-	// TODO : Possibility to customize the status with a custom image, custom title...
-    char command;
+    char command = 'w';
     do 
     {
-        SetupConsole(); 
-        bool showMessageBox = false;
+        SetupConsole();
 
         // horrendous shit
         printf("\u0020\u0020\u2584\u2584\u2584\u2584\u2584\u2584\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u0020\u2584\u2584\u2584\u2584\u2584\u2584\u0020\u0020\u0020\u0020\u0020\u2584\u2584\u2584\u2584\u2584\u2584\u0020\u0020\u0020\u0020\u2584\u0020\u0020\u0020\u2584\u2584\u2584\u2584\u0020\n");
@@ -22,14 +19,13 @@ int main ()
 
         /*
         printf("  ▄▄▄▄▄▄                   ▄▄▄▄▄▄     ▄▄▄▄▄▄    ▄   ▄▄▄▄▄ \n");
-        printf(" █▀██▀▀██                 █▀██▀▀▀█▄  █▀██▀▀▀█▄  ▀██████▀\n");
+        printf(" █▀██▀▀██                 █▀██▀▀▀█▄  █▀██▀▀▀█▄  ▀████▄▄▀\n");
         printf("   ██   ██ ▀▀               ██▄▄▄█▀    ██▄▄▄█▀    ██\n");
-        printf("   ██   ██ ██ ▄██▀█         ██▀▀█▄     ██▀▀▀      ██n");
-        printf(" ▄ ██   ██ ██ ▀███▄       ▄ ██  ██   ▄ ██         ██n");
+        printf("   ██   ██ ██ ▄██▀█         ██▀▀█▄     ██▀▀▀     ██n");
+        printf(" ▄ ██   ██ ██ ▀███▄       ▄ ██  ██   ▄ ██        ██▄n");
         printf(" ▀██▀███▀ ▄███▄▄██▀       ▀██▀  ▀██▀ ▀██▀         ▀█████▄\n");
         */
 
-        DWORD u_len = UNLEN+1;
         char username[UNLEN+1];
         void* connect = NULL;
         printf("Connecting to discord pipe...\n");
