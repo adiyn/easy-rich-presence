@@ -17,7 +17,7 @@ typedef struct PacketHeader
 #include ".\src\connection.h"
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 static HANDLE stdoutHandle;
-static unsigned long outModeInit;
+static unsigned int oldCodePage;
 
 typedef struct PacketHeader
 {
@@ -25,10 +25,9 @@ typedef struct PacketHeader
 	int oplength;
 } PacketHeader;
 
-void SetupConsole(void) {
-    //static unsigned int oldCodePage;
-    //issue : not valid    
+void SetupConsole(void) {   
     unsigned long outMode = 0;
+    static unsigned long outModeInit;
     stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
     if(stdoutHandle == INVALID_HANDLE_VALUE) exit(GetLastError());
@@ -48,10 +47,6 @@ void RestoreConsole(void) {
     // Reset color
     printf("\x1b[0m");  
     
-    // Reset console mode
-    if(!SetConsoleMode(stdoutHandle, outModeInit)) {
-        exit(GetLastError());
-    }
     SetConsoleOutputCP(oldCodePage);
     
     SetConsoleMode(stdoutHandle, outModeInit);
