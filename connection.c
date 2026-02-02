@@ -12,7 +12,7 @@ typedef struct PacketHeader
 } PacketHeader;
 #pragma pack(pop)
 
-///////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 #elif _WIN32
 #include ".\src\connection.h"
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -26,14 +26,19 @@ typedef struct PacketHeader
 } PacketHeader;
 
 void SetupConsole(void) {
+    //static unsigned int oldCodePage;
+    //issue : not valid    
     unsigned long outMode = 0;
     stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
     if(stdoutHandle == INVALID_HANDLE_VALUE) exit(GetLastError());
     if(!GetConsoleMode(stdoutHandle, &outMode)) exit(GetLastError());
+    
+    oldCodePage = GetConsoleOutputCP();
+    SetConsoleOutputCP(65001);
 
     outModeInit = outMode;
-    // Enable ANSI escape codes 
+    
     outMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
 
     if(!SetConsoleMode(stdoutHandle, outMode)) exit(GetLastError());   
@@ -47,6 +52,9 @@ void RestoreConsole(void) {
     if(!SetConsoleMode(stdoutHandle, outModeInit)) {
         exit(GetLastError());
     }
+    SetConsoleOutputCP(oldCodePage);
+    
+    SetConsoleMode(stdoutHandle, outModeInit);
 }
 
 void SendHandshake(HANDLE hPipe)
