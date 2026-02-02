@@ -77,8 +77,8 @@ void SendHandshake(HANDLE hPipe)
     WriteFile(hPipe, &header, sizeof(PacketHeader), &bytesWritten, NULL);
     WriteFile(hPipe, json_buffer, json_len, &bytesWritten, NULL);
 
-    printf("Handshank request sent ! (Opcode: %d, Len: %d)\n", header.opcode, header.oplength);
-    printf("Payload: %s\n", json_buffer);
+    printf(" \tHandshank request sent ! %s(Opcode: %d, Len: %d)%s\n", KGRN, header.opcode, header.oplength, KNRM);
+    printf(" \t%sPayload: %s\n", KGRN, json_buffer);
 }
 
 void UpdatePresence(HANDLE hPipe)
