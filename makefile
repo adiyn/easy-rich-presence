@@ -14,4 +14,4 @@ connection.o: connection.c ./src/connection.h
 	$(CC) $(CFLAGS) -c connection.c
 
 clean:
-	rm -f *.o app
+	rm -f *.o *.exe
