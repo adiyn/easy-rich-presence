@@ -1,7 +1,10 @@
-#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
-#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+/***
+DisRPC is an RPC tool made in C with ❤ by @adiyn
+***/
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef __linux__
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "src/connection.h"
 
 #pragma pack(push, 1)
@@ -14,17 +17,22 @@ typedef struct PacketHeader
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 #elif _WIN32
-#include ".\src\connection.h"
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+#include ".\src\connection.h"
 static HANDLE stdoutHandle;
 static unsigned int oldCodePage;
 static unsigned long outModeInit;
 
+#pragma pack(push, 1)
 typedef struct PacketHeader
 {
 	int opcode;
 	int oplength;
 } PacketHeader;
+#pragma pack(pop)
 
 void SetupConsole(void) {   
     unsigned long outMode = 0;
