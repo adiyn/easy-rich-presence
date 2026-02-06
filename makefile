@@ -1,11 +1,11 @@
 CC = gcc
-CFLAGS = -L./src -Wall -Wextra
+CFLAGS = -Wall -Wextra -I./src
 OBJ = app.o connection.o
 
 all: app
 
 app: $(OBJ)
-	$(CC) -o app $(OBJ)
+	$(CC) $(CFLAGS) -o app.exe $(OBJ) -lPsapi
 
 app.o: app.c
 	$(CC) $(CFLAGS) -c app.c

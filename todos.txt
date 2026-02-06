@@ -1,8 +1,8 @@
-makefile (done)
-procs list names : finish getProcName
-terminal ui
-show running apps
-select app
-fill what's asked, default is " "
+makefile : (done)
+procs list names : (fix SEGV)
+terminal ui : (WIP)
+show running apps : (done)
+select app : (done)
+fill what's asked, default is '' : (changed to default stuff)
 
-if i feel like it : full blown app
+if i feel like it i'll make a full blown app : (no, fuck you (me) (you ?) (I am me you are me we are I))
