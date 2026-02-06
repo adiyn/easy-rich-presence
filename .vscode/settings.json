@@ -1,7 +1,0 @@
-{
-    "files.associations": {
-        "connection.h": "c",
-        "string.h": "c",
-        "lmcons.h": "c"
-    }
-}
