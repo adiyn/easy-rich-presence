@@ -1,41 +1,49 @@
-# dis rpC!
+# dis-rpC !
 
-A discord rich presence tool to make it easier to share what you're doign with people !
+A lightweight Rich Presence tool with a CLI, made in C.
+Connects directly to apps via IPC pipes, avoiding bloated dependencies.
 
-## Description
+## Features
 
-Simple rpc CLI app.
+* **Performance:** Written in C, practically zero resource usage.
+* **Standalone:** No Python, Node.js, or heavy libraries required.
+* **Cross-Platform:** Designed for Windows (WinAPI) and Linux (Unix Sockets). *Linux part isn't done yet.*
 
-## Getting Started
+## How it works
 
-### Dependencies
+dis-rpC bypasses  web APIs and communicates directly with your local clients using IPC.
+* **example:**
+  * **Discord :** Connects via `\\.\pipe\discord-ipc-0` in the ram
 
-* None
+## Installation
 
-### Installing
+### Pre-compiled
+ WIP.
 
-* Download the latest releasefor ur os :3
+## Building from source
 
-### Executing program
+  **Requirements:** GCC, Make.
+  
+  ```bash
+  git clone https://codeberg.org/adiyn/dis-rpC.git
+  cd dis-rpC
+  make
+  ./app
+  ```
 
-* get the compiled app thingy
 
-## Help
+### Roadmap
 
-* If you encounter any issues open one.
+  * make a CLI.
+  * Implement a conf file for custom images and status text n stuff.
 
-## Author
 
-For personal reasons i will not disclose my name.
+### License
 
-## Version History (WIP)
+Distributed under the Apache 2.0 License. See LICENSE for more information.
 
-* WIP
+### Author
 
-## License
+  * adiyn
 
-This project is licensed under the APACHE 2.0 Licence.
-
-## Acknowledgments
-
-* [inspired by](https://github.com/discord/discord-rpc)
+# :3
