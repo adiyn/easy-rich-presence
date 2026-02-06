@@ -10,12 +10,12 @@ int main ()
 
     system("cls");
     printf("\n\n\n");
-    printf("%s                       ▄▄▄▄▄▄                   ▄▄▄▄▄▄     ▄▄▄▄▄▄    ▄   ▄▄▄▄▄ %s\n", MAGHB, KNRM); // giggity
-    printf("%s                      █▀██▀▀██                 █▀██▀▀▀█▄  █▀██▀▀▀█▄  ▀████▄▄▀  %s\n", MAGHB, KNRM);
-    printf("%s                        ██   ██ ▀▀ ▄██▀█         ██▄▄▄█▀    ██▄▄▄█▀    ██      %s\n", MAGHB, KNRM);
-    printf("%s                        ██   ██ ██ ▀███▄         ██▀▀█▄     ██▀▀▀     ██       %s\n", MAGHB, KNRM);
-    printf("%s                      ▄ ██   ██ ██ ▄▄██▀       ▄ ██  ██   ▄ ██        ██▄      %s\n", MAGHB, KNRM);
-    printf("%s                      ▀▀▀▀▀▀▀▀ ▀▀▀▀            ▀▀▀▀  ▀▀▀▀ ▀▀▀▀▀         ▀▀▀▀▀▀ %s\n", MAGHB, KNRM);
+    printf("\t%s                       ▄▄▄▄▄▄                   ▄▄▄▄▄▄     ▄▄▄▄▄▄    ▄   ▄▄▄▄▄                     %s\n", MAGHB, KNRM); // giggity
+    printf("\t%s                      █▀██▀▀██                 █▀██▀▀▀█▄  █▀██▀▀▀█▄  ▀████▄▄▀                      %s\n", MAGHB, KNRM);
+    printf("\t%s                        ██   ██ ▀▀ ▄██▀█         ██▄▄▄█▀    ██▄▄▄█▀    ██                          %s\n", MAGHB, KNRM);
+    printf("\t%s                        ██   ██ ██ ▀███▄         ██▀▀█▄     ██▀▀▀     ██                           %s\n", MAGHB, KNRM);
+    printf("\t%s                      ▄ ██   ██ ██ ▄▄██▀       ▄ ██  ██   ▄ ██        ██▄                          %s\n", MAGHB, KNRM);
+    printf("\t%s                      ▀▀▀▀▀▀▀▀ ▀▀▀▀            ▀▀▀▀  ▀▀▀▀ ▀▀▀▀▀         ▀▀▀▀▀▀                     %s\n", MAGHB, KNRM);
 
     char username[UNLEN+1];
     void* connect = NULL;
@@ -26,7 +26,7 @@ int main ()
     {
         connect = ConnectionDiscord();
         attempts--;
-        Sleep(69); // hmm...
+        Sleep(69); // hmm... magic.
     } while (connect == NULL && attempts > 0);
 
     if (attempts == 0)
@@ -47,12 +47,10 @@ int main ()
 
     printf(" \tConnection established. %s\n", KNRM);
     SendHandshake(connect);
-    Sleep(911); // ehe~ (sorry)
+    Sleep(911); // ehe (sorry)
     UpdatePresence(connect);
     printf("\n\n\n \t%sdis-rpC is Online, press 'enter' to exit %s(WIP).%s\n", KGRN, KRED, KNRM);
     getchar();
-
-    RestoreConsole();
     return EXIT_SUCCESS;
 }
 

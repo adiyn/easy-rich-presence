@@ -1,4 +1,5 @@
-makefile
+makefile (done)
+procs list names : finish getProcName
 terminal ui
 show running apps
 select app
