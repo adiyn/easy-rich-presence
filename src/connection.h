@@ -6,15 +6,16 @@
 #define MAGHB               "\e[0;105m" // special purble
 #define KNRM                "\x1B[0m" // no
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdbool.h>
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef __linux__
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // required libraries
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
 #include <unistd.h>
 #include <sys/socket.h>
 
@@ -24,10 +25,6 @@
 #elif _WIN32
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdbool.h>
 #include <windows.h>
 #include <lmcons.h>
 #include <tchar.h>
