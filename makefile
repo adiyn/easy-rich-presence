@@ -5,7 +5,7 @@ OBJ = app.o connection.o
 all: app
 
 app: $(OBJ)
-	$(CC) $(CFLAGS) -o app.exe $(OBJ) -lPsapi
+	$(CC) $(CFLAGS) -o dis-rpC.exe $(OBJ) -lPsapi
 
 app.o: app.c
 	$(CC) $(CFLAGS) -c app.c

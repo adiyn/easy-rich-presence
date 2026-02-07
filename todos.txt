@@ -1,8 +1,8 @@
 makefile : (done)
-procs list names : (fix SEGV)
-terminal ui : (WIP)
+procs list names : (FIX PROCESS POLLUTION)
+terminal ui : (done)
 show running apps : (done)
 select app : (done)
-fill what's asked, default is '' : (changed to default stuff)
+fill what's asked, default is '' : (default stuff for now)
 
-if i feel like it i'll make a full blown app : (no, fuck you (me) (you ?) (I am me you are me we are I))
+if i feel like it i'll make a full blown app : (no, fuck you (me) (you ?) (I am me you are me we are I)) goign insane...

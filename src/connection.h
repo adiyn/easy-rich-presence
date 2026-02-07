@@ -29,28 +29,41 @@
 #include <lmcons.h>
 #include <tchar.h>
 #include <psapi.h>
+#include <tlhelp32.h>
 
 #define DIS_PIPE_ADDR       "\\\\.\\pipe\\discord-ipc-0" // memory adress of pipe
-#define MAX_BUFFER_SIZE 1024
+#define MAX_BUFFER_SIZE 4096
 
 static HANDLE stdoutHandle;
 static unsigned int oldCodePage;
 static unsigned long outModeInit;
 
-// send handshake request
-void SendHandshake(HANDLE hPipe);
-// update rpc presence 
-void UpdatePresence(HANDLE hPipe, const char* message, const char* state, const char* appName);
+// shows the logo
+void showLogo(void);
 // allows ansi escape codes
 void SetupConsole(void);
 // reverts changes made to console
 void RestoreConsole(void);
-// returns a list of the names of running apps "{"Firefox (sigma)", "Discord", "CheatEngine", "Edge (stinky)", "Chrome (stinky)", ...}"
-char** getProcsNames(DWORD processID, char* buffer, size_t bufferSize);
+// send handshake request
+void SendHandshake(HANDLE hPipe);
+// checks if the app should be ignored (just dis-rpC itself)
+bool isToBeIgnored(const char* name);
+// checks if a process has a visible window (like Task Manager's "Apps" view)
+bool hasVisibleWindow(DWORD pid);
+// returns a list of apps with visible windows {"Firefox.exe", "Code.exe", ...}
+char** getProcsNames(void);
+// converts app name to asset name (for example "Firefox.exe" -> "firefox")
+char* appNameToAssetName(const char* appName);
+// shows the list of running apps
+void showRunning(char** procs);
+// update rpc presence 
+void UpdatePresence(HANDLE hPipe, const char* message, const char* state, const char* appName);
 // connect to discord
 void* ConnectionDiscord(void);
 // establishes connection to discord and returns a handle to the pipe
 void* EstablishConnection(void);
+// frees the memory allocated for the list of process names
+void freeProcs(char** procs);
 // run app
 void run(HANDLE connect);
 

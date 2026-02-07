@@ -12,16 +12,7 @@
 int main ()
 {
     SetupConsole();
-
-    system("cls");
-    printf("\n\n\n");
-    printf("\t%s                       ▄▄▄▄▄▄                   ▄▄▄▄▄▄     ▄▄▄▄▄▄    ▄   ▄▄▄▄▄                     %s\n", MAGHB, KNRM); // giggity
-    printf("\t%s                      █▀██▀▀██                 █▀██▀▀▀█▄  █▀██▀▀▀█▄  ▀████▄▄▀                      %s\n", MAGHB, KNRM);
-    printf("\t%s                        ██   ██ ▀▀ ▄██▀█         ██▄▄▄█▀    ██▄▄▄█▀    ██                          %s\n", MAGHB, KNRM);
-    printf("\t%s                        ██   ██ ██ ▀███▄         ██▀▀█▄     ██▀▀▀     ██                           %s\n", MAGHB, KNRM);
-    printf("\t%s                      ▄ ██   ██ ██ ▄▄██▀       ▄ ██  ██   ▄ ██        ██▄                          %s\n", MAGHB, KNRM);
-    printf("\t%s                      ▀▀▀▀▀▀▀▀ ▀▀▀▀            ▀▀▀▀  ▀▀▀▀ ▀▀▀▀▀         ▀▀▀▀▀▀                     %s\n", MAGHB, KNRM);
-
+    showLogo();
     char username[UNLEN+1];
     void* connect = NULL;
     printf("\n\n\n \tConnecting to discord pipe...\n");

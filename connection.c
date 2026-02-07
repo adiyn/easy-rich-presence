@@ -23,6 +23,17 @@ typedef struct PacketHeader
 } PacketHeader;
 #pragma pack(pop)
 
+void showLogo() {
+    system("cls");
+    printf("\n\n\n");
+    printf("\t%s                       ▄▄▄▄▄▄                   ▄▄▄▄▄▄     ▄▄▄▄▄▄    ▄   ▄▄▄▄▄                     %s\n", MAGHB, KNRM); // giggity
+    printf("\t%s                      █▀██▀▀██                 █▀██▀▀▀█▄  █▀██▀▀▀█▄  ▀████▄▄▀                      %s\n", MAGHB, KNRM);
+    printf("\t%s                        ██   ██  ▀▀ ▄██▀█         ██▄▄▄█▀    ██▄▄▄█▀    ██                         %s\n", MAGHB, KNRM);
+    printf("\t%s                        ██   ██  ██ ▀███▄         ██▀▀█▄     ██▀▀▀     ██                          %s\n", MAGHB, KNRM);
+    printf("\t%s                      ▄ ██   ██  ██ ▄▄██        ▄ ██  ██   ▄ ██        ██▄                         %s\n", MAGHB, KNRM);
+    printf("\t%s                     ▀▀▀▀▀▀▀▀▀  ▀▀▀             ▀▀▀▀  ▀▀▀▀ ▀▀▀▀▀        ▀▀▀▀▀▀                     %s\n", MAGHB, KNRM);
+}
+
 void SetupConsole(void) {   
     unsigned long outMode = 0x0;
     stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -65,67 +76,147 @@ void SendHandshake(HANDLE hPipe)
     printf(" \tRequest: %s%s%s\n", KGRN, json_buffer, KNRM);
 }
 
-// windows api garbage
-char** getProcsNames(DWORD processID, char* buffer, size_t bufferSize)
+bool isToBeIgnored(const char* name) {
+    const char* ignored[] = {
+        "dis-rpC.exe", "app.exe", NULL
+    };
+    
+    for (int i = 0; ignored[i] != NULL; i++) {
+        if (_stricmp(name, ignored[i]) == 0) return true;
+    }
+    return false;
+}
+
+// Store PIDs of processes with visible windows
+static DWORD* g_visiblePids = NULL;
+static int g_visibleCount = 0;
+static int g_visibleCapacity = 0;
+
+// windows API garbage
+BOOL CALLBACK EnumWindowsCallback(HWND hwnd, LPARAM lParam) {
+    // Check if window is visible and has a title
+    if (!IsWindowVisible(hwnd)) return TRUE;
+    
+    char title[256];
+    if (GetWindowTextA(hwnd, title, sizeof(title)) == 0) return TRUE;
+    if (strlen(title) == 0) return TRUE;
+    
+    // Get the process ID for this window
+    DWORD pid;
+    GetWindowThreadProcessId(hwnd, &pid);
+    
+    // Check if we already have this PID
+    for (int i = 0; i < g_visibleCount; i++) {
+        if (g_visiblePids[i] == pid) return TRUE;
+    }
+    
+    // Add to list
+    if (g_visibleCount >= g_visibleCapacity) {
+        g_visibleCapacity = g_visibleCapacity == 0 ? 64 : g_visibleCapacity * 2;
+        g_visiblePids = realloc(g_visiblePids, g_visibleCapacity * sizeof(DWORD));
+    }
+    g_visiblePids[g_visibleCount++] = pid;
+    
+    return TRUE;
+}
+
+bool hasVisibleWindow(DWORD pid) {
+    // Check if PID is in the list of processes with visible windows
+    for (int i = 0; i < g_visibleCount; i++) {
+        if (g_visiblePids[i] == pid) return true;
+    }
+    return false;
+}
+
+char** getProcsNames(void)
 {
-    char** procNames = malloc(sizeof(char*) * 42); // #JFA
-
+    g_visibleCount = 0;
+    EnumWindows(EnumWindowsCallback, 0);
+    
+    // NOTE : CreateToolhelp32Snapshot - works across 32/64 bit processes
+    HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (hSnapshot == INVALID_HANDLE_VALUE) {
+        fprintf(stderr, "CreateToolhelp32Snapshot failed\n");
+        return NULL;
+    }
+    
+    PROCESSENTRY32 pe32;
+    pe32.dwSize = sizeof(PROCESSENTRY32);
+    
+    int totalProcs = 0;
+    if (Process32First(hSnapshot, &pe32)) {
+        do {
+            totalProcs++;
+        } while (Process32Next(hSnapshot, &pe32));
+    }
+    
+    char** procNames = malloc(sizeof(char*) * (totalProcs + 1));
     if (procNames == NULL) {
-        fprintf(stderr, "lol u need more ram\n");
+        fprintf(stderr, "go buy RAM smh (alloc error)\n");
+        CloseHandle(hSnapshot);
         return NULL;
     }
-
-    HANDLE hProcess = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION | PROCESS_VM_READ, FALSE, processID);
-    if (hProcess == NULL) {
-        fprintf(stderr, "processn't %ld\n", processID);
-        free(procNames);
-        return NULL;
+    
+    pe32.dwSize = sizeof(PROCESSENTRY32);
+    int count = 0;
+    
+    if (Process32First(hSnapshot, &pe32)) {
+        do {
+            if (hasVisibleWindow(pe32.th32ProcessID) && !isToBeIgnored(pe32.szExeFile)) {
+                int isDupe = 0;
+                for (int j = 0; j < count; j++) {
+                    if (_stricmp(procNames[j], pe32.szExeFile) == 0) {
+                        isDupe = 1;
+                        break;
+                    }
+                }
+                if (!isDupe) {
+                    procNames[count] = strdup(pe32.szExeFile);
+                    count++;
+                }
+            }
+        } while (Process32Next(hSnapshot, &pe32));
     }
-
-    HMODULE hMod;
-    DWORD cbNeeded;
-
-    if (EnumProcessModules(hProcess, &hMod, sizeof(hMod), &cbNeeded)) {
-        GetModuleBaseNameA(hProcess, hMod, buffer, bufferSize);
-        procNames[0] = strdup(buffer); // store name
-    } else {
-        fprintf(stderr, "process enumeration failed :( %ld\n", processID);
-        free(procNames);
-        CloseHandle(hProcess);
-        return NULL;
-    }
-
-    CloseHandle(hProcess);
+    
+    CloseHandle(hSnapshot);
+    procNames[count] = NULL; // SEGVn't
     return procNames;
 }
 
 char* appNameToAssetName(const char* appName) {
-    size_t j = 0;
     char* assetName = NULL;
-    for (size_t i = 0; appName[i] != '\0' && j < MAX_BUFFER_SIZE - 1; i++) {
-        if (strcmp(appName, "Discord.exe") == 0) {
-            assetName = "edge";
-            break;
-        }
-        else if (strcmp(appName, "chrome.exe") == 0) {
-            assetName = "chrome";
-            break;
-        }
-        else if (strcmp(appName, "Firefox.exe") == 0) {
-            assetName = "firefox";
-            break;
-        }
-        else {
-            assetName = "sleepy";
-        }
+    if (_stricmp(appName, "firefox.exe") == 0) {
+        assetName = "firefox";
+    } else if (_stricmp(appName, "chrome.exe") == 0) {
+        assetName = "chrome";
+    } else if (_stricmp(appName, "code.exe") == 0) {
+        assetName = "vscode";
+    } else if (_stricmp(appName, "edge.exe") == 0 || _stricmp(appName, "msedge.exe") == 0) {
+        assetName = "edge";
+    } else if (_stricmp(appName, "spotify.exe") == 0) {
+        assetName = "spotify";
+    } else if (_stricmp(appName, "w64devkit.exe") == 0) {
+        assetName = "w64devkit";
+    } else if (_stricmp(appName, "minecraft.exe") == 0) {
+        assetName = "minecraft";
+    } else if (_stricmp(appName, "hytale.exe") == 0) {
+        assetName = "hytale";
+    } else {
+        assetName = "sleepy";
     }
     return assetName;
 }
 
 void showRunning(char** procs) {
-    printf("Running apps :\n");
-    for (int i = 0; i < 9 && procs[i] != NULL; i++) {
-        printf("\t\t@ [%d] %s\n", i + 1, procs[i]);
+    printf("\tRunning apps :\n");
+    int i;
+    for (i = 0; i < 15 && procs[i] != NULL; i++) {
+        if (i >= 9) {
+            printf("\t\t@ [%c] %s\n", 'A' + i - 9, procs[i]);
+        }
+        else {
+            printf("\t\t@ [%d] %s\n", i+1, procs[i]);
+        }
     }
 }
 
@@ -156,14 +247,12 @@ void UpdatePresence(HANDLE hPipe, const char* message, const char* state, const 
     header.opLength = json_len;
     unsigned long bytesWritten;
 	
-    // more windows api garbage
     WriteFile(hPipe, &header, sizeof(PacketHeader), &bytesWritten, NULL);
     WriteFile(hPipe, json_buffer, json_len, &bytesWritten, NULL);
 
     printf(" \tPayload Sent : %s%s%s\n", KGRN, json_buffer, KNRM);
 }
 
-// even more windows api garbage
 HANDLE ConnectionDiscord()
 {
 	HANDLE hipe = CreateFileA(DIS_PIPE_ADDR, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
@@ -205,35 +294,89 @@ void* EstablishConnection()
     printf(" \tConnection established. %s\n", KNRM);
     SendHandshake(connect);
     Sleep(911); // Jsclatt ???
-    printf("\n\n\n \tdis-rpC is %sOnline%s %s(WIP).%s\n", KGRN, KNRM, KRED, KNRM);
+    printf("\n\n\n \tdis-rpC is %sOnline%s %s(WIP).%s\n\n", KGRN, KNRM, KRED, KNRM);
     return connect;
+}
+
+void showConnectionStatus(char* process) {
+    if (process != NULL) {
+        printf("\n\t%s[+] Connected to : %s%s%s\n", MAGHB, KGRN, process, KNRM);
+        printf("\n\t%sChoose a process : [1-9 A-F] or : [r]efresh | [s]leep | [q]uit%s\n\n", MAGHB, KNRM);
+    } else {
+        printf("\n\t%sChoose a process : [1-9, A-F] or : [r]efresh | [s]leep | [q]uit%s\n\n", MAGHB, KNRM);
+    }
+}
+
+void freeProcs(char** procs) {
+    if (procs == NULL) return;
+    for (int i = 0; procs[i] != NULL; i++) {
+        free(procs[i]);
+    }
+    free(procs);
 }
 
 void run(HANDLE connect) {
     char message[MAX_BUFFER_SIZE];
     char state[MAX_BUFFER_SIZE];
-    char command = '0';
-    char** procs = getProcsNames(GetCurrentProcessId(), message, MAX_BUFFER_SIZE);
-    showRunning(procs);
-
+    char command = '\0'; // hex
+    char** procs = getProcsNames();
+    char* chosenApp = NULL;
+    int procCount = 0;
+    for (int i = 0; procs[i] != NULL; i++) procCount++;
+    
     while (command != 'q') {
-        printf("\tchoose app to display in presence (q to quit / n for next page / p for previous) : ");
-        scanf(" %c", &command);
-        if (command == 'n' || command == 'p') {
-            printf("pagination not implemented yet, sorry :(\n");
+        showLogo();
+        procs = getProcsNames();
+        showConnectionStatus(chosenApp);
+        showRunning(procs);
+        printf("\t> ");
+        scanf("%c", &command);
+        if (command == 'r') {
+            freeProcs(procs);
+            printf("\n\t%sProcess list refreshed!%s\n\n", KGRN, KNRM);
+            continue;
         }
-        else if (command >= '1' && command <= '9') {
+        else if (command == 'n' || command == 'p') {
+            printf("\tpagination not implemented yet, sorry :(\n");
+        }
+        else if (command >= '1' && command <= '9' && (command - '1') < procCount) {
             int index = command - '1';
             if (procs[index] != NULL) {
-                sprintf(message, "Using %s", procs[index]);
+                chosenApp = procs[index];
+                sprintf(message, "Using %s", chosenApp);
                 sprintf(state, "PID : %ld", GetCurrentProcessId());
                 UpdatePresence(connect, message, state, procs[index]);
             }
         }
+        else if (command == '0' && 9 < procCount) {
+            if (procs[9] != NULL) {
+                chosenApp = procs[9];
+                sprintf(message, "Using %s", chosenApp);
+                sprintf(state, "PID : %ld", GetCurrentProcessId());
+                UpdatePresence(connect, message, state, chosenApp);
+            }
+        }
+        else if ((command >= 'A' && command <= 'F' && (command - 'A' + 9) < procCount) || (command >= 'a' && command <= 'f' && (command - 'a' + 9) < procCount)) {
+            int index = (command >= 'A' && command <= 'F') ? (command - 'A' + 9) : (command - 'a' + 9);
+            if (procs[index] != NULL) {
+                chosenApp = procs[index];
+                sprintf(message, "Using %s", chosenApp);
+                sprintf(state, "PID : %ld", GetCurrentProcessId());
+                UpdatePresence(connect, message, state, chosenApp);
+            }
+        }
+        else if (command == 's') {
+            chosenApp = "eeping";
+            sprintf(message, "eeping..");
+            sprintf(state, "PID : %ld", GetCurrentProcessId());
+            UpdatePresence(connect, message, state, "sleepy");
+        }
         else {
-            continue; 
+            continue;
         }
     }
+    printf("\n\t%sbabaiii :3%s\n\n", KGRN, KNRM);
+    freeProcs(procs);
 }
 
 #endif
