@@ -13,7 +13,11 @@ DisRPC is an RPC tool made in C !
 #elif _WIN32
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include "src/connection.h"
+#include "connection.h"
+
+static HANDLE stdoutHandle;
+static unsigned int oldCodePage;
+static unsigned long outModeInit;
 
 #pragma pack(push, 1) // discord needs a continuous stream of bytes, so we need to pack the struct
 typedef struct PacketHeader
@@ -23,18 +27,19 @@ typedef struct PacketHeader
 } PacketHeader;
 #pragma pack(pop)
 
-void showLogo() {
-    system("cls");
+void showLogo()
+{ // giggity
     printf("\n\n\n");
-    printf("\t%s                       ▄▄▄▄▄▄                   ▄▄▄▄▄▄     ▄▄▄▄▄▄    ▄   ▄▄▄▄▄                     %s\n", MAGHB, KNRM); // giggity
-    printf("\t%s                      █▀██▀▀██                 █▀██▀▀▀█▄  █▀██▀▀▀█▄  ▀████▄▄▀                      %s\n", MAGHB, KNRM);
+    printf("\t%s                       ▄▄▄▄▄▄                   ▄▄▄▄▄▄     ▄▄▄▄▄▄    ▄   ▄▄▄▄▄                     %s\n", MAGHB, KNRM);
+    printf("\t%s                      █▀██▀▀██                 █▀██▀▀▀█▄  █▀██▀▀▀█▄  ▀████▄▄▄█▀                    %s\n", MAGHB, KNRM);
     printf("\t%s                        ██   ██  ▀▀ ▄██▀█         ██▄▄▄█▀    ██▄▄▄█▀    ██                         %s\n", MAGHB, KNRM);
     printf("\t%s                        ██   ██  ██ ▀███▄         ██▀▀█▄     ██▀▀▀     ██                          %s\n", MAGHB, KNRM);
     printf("\t%s                      ▄ ██   ██  ██ ▄▄██        ▄ ██  ██   ▄ ██        ██▄                         %s\n", MAGHB, KNRM);
     printf("\t%s                     ▀▀▀▀▀▀▀▀▀  ▀▀▀             ▀▀▀▀  ▀▀▀▀ ▀▀▀▀▀        ▀▀▀▀▀▀                     %s\n", MAGHB, KNRM);
 }
 
-void SetupConsole(void) {   
+void SetupConsole(void)
+{   
     unsigned long outMode = 0x0;
     stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 
@@ -76,7 +81,8 @@ void SendHandshake(HANDLE hPipe)
     printf(" \tRequest: %s%s%s\n", KGRN, json_buffer, KNRM);
 }
 
-bool isToBeIgnored(const char* name) {
+bool isToBeIgnored(const char* name)
+{
     const char* ignored[] = {
         "dis-rpC.exe", "app.exe", NULL
     };
@@ -93,35 +99,33 @@ static int g_visibleCount = 0;
 static int g_visibleCapacity = 0;
 
 // windows API garbage
-BOOL CALLBACK EnumWindowsCallback(HWND hwnd, LPARAM lParam) {
-    // Check if window is visible and has a title
-    if (!IsWindowVisible(hwnd)) return TRUE;
+BOOL CALLBACK EnumWindowsCallback(HWND hwnd, LPARAM lParam)
+{
+    (void)lParam; // unused
+    if (!IsWindowVisible(hwnd)) return true;
     
     char title[256];
-    if (GetWindowTextA(hwnd, title, sizeof(title)) == 0) return TRUE;
-    if (strlen(title) == 0) return TRUE;
+    if (GetWindowTextA(hwnd, title, sizeof(title)) == 0) return true;
+    if (strlen(title) == 0) return true;
     
-    // Get the process ID for this window
     DWORD pid;
     GetWindowThreadProcessId(hwnd, &pid);
     
-    // Check if we already have this PID
     for (int i = 0; i < g_visibleCount; i++) {
-        if (g_visiblePids[i] == pid) return TRUE;
+        if (g_visiblePids[i] == pid) return true;
     }
     
-    // Add to list
     if (g_visibleCount >= g_visibleCapacity) {
         g_visibleCapacity = g_visibleCapacity == 0 ? 64 : g_visibleCapacity * 2;
         g_visiblePids = realloc(g_visiblePids, g_visibleCapacity * sizeof(DWORD));
     }
     g_visiblePids[g_visibleCount++] = pid;
     
-    return TRUE;
+    return true;
 }
 
-bool hasVisibleWindow(DWORD pid) {
-    // Check if PID is in the list of processes with visible windows
+bool hasVisibleWindow(DWORD pid)
+{
     for (int i = 0; i < g_visibleCount; i++) {
         if (g_visiblePids[i] == pid) return true;
     }
@@ -133,7 +137,7 @@ char** getProcsNames(void)
     g_visibleCount = 0;
     EnumWindows(EnumWindowsCallback, 0);
     
-    // NOTE : CreateToolhelp32Snapshot - works across 32/64 bit processes
+    // NOTE : CreateToolhelp32Snapshot - works across 32/64 bit processes unlike EnumProcesses
     HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (hSnapshot == INVALID_HANDLE_VALUE) {
         fprintf(stderr, "CreateToolhelp32Snapshot failed\n");
@@ -183,7 +187,8 @@ char** getProcsNames(void)
     return procNames;
 }
 
-char* appNameToAssetName(const char* appName) {
+char* appNameToAssetName(const char* appName)
+{
     char* assetName = NULL;
     if (_stricmp(appName, "firefox.exe") == 0) {
         assetName = "firefox";
@@ -193,8 +198,8 @@ char* appNameToAssetName(const char* appName) {
         assetName = "vscode";
     } else if (_stricmp(appName, "edge.exe") == 0 || _stricmp(appName, "msedge.exe") == 0) {
         assetName = "edge";
-    } else if (_stricmp(appName, "spotify.exe") == 0) {
-        assetName = "spotify";
+    } else if (_stricmp(appName, "discord.exe") == 0) {
+        assetName = "discord";
     } else if (_stricmp(appName, "w64devkit.exe") == 0) {
         assetName = "w64devkit";
     } else if (_stricmp(appName, "minecraft.exe") == 0) {
@@ -202,12 +207,13 @@ char* appNameToAssetName(const char* appName) {
     } else if (_stricmp(appName, "hytale.exe") == 0) {
         assetName = "hytale";
     } else {
-        assetName = "sleepy";
+        assetName = "default";
     }
     return assetName;
 }
 
-void showRunning(char** procs) {
+void showRunning(char** procs)
+{
     printf("\tRunning apps :\n");
     int i;
     for (i = 0; i < 15 && procs[i] != NULL; i++) {
@@ -220,28 +226,35 @@ void showRunning(char** procs) {
     }
 }
 
-void UpdatePresence(HANDLE hPipe, const char* message, const char* state, const char* appName)
+void UpdatePresence(HANDLE hPipe, const char* details, const char* subtitle, const char* appName)
 {
     char json_buffer[MAX_BUFFER_SIZE];
     int APP_PID = GetCurrentProcessId();
     
     sprintf(json_buffer, 
-        "{\"cmd\": \"SET_ACTIVITY\","
-        "\"args\": {"
-            "\"pid\": %d,"
-            "\"activity\": {"
-                "\"details\": \"%s\","
-                "\"state\": \"%s\","
-                "\"assets\": {"
-                    "\"large_image\": \"%s\","
-                    "\"large_text\": \"%s\""
+        "{"
+            "\"cmd\":\"SET_ACTIVITY\","
+            "\"args\":{"
+                "\"pid\":%d,"
+                "\"activity\":{"
+                    "\"state\":\"%s\","
+                    "\"details\":\"%s\","
+                    "\"assets\":{"
+                        "\"large_image\":\"%s\","
+                        "\"large_text\":\"%s\""
+                    "},"
+                    "\"buttons\":[{"
+                        "\"label\":\"dis-rpC\","
+                        "\"url\":\"https://codeberg.org/adiyn/dis-rpC\""
+                    "}]"
                 "}"
-            "}"
-        "},"
-        "\"nonce\": \"%d\"}", 
-        APP_PID, message, state, appNameToAssetName(appName), appName, 69);
-	int json_len = strlen(json_buffer);
-
+            "},"
+            "\"nonce\":%d"
+        "}",
+        APP_PID, subtitle, details, appNameToAssetName(appName), appName, rand()%68+1);
+    
+    int json_len = strlen(json_buffer);
+    
     PacketHeader header;
     header.opCode = 1;
     header.opLength = json_len;
@@ -249,6 +262,10 @@ void UpdatePresence(HANDLE hPipe, const char* message, const char* state, const 
 	
     WriteFile(hPipe, &header, sizeof(PacketHeader), &bytesWritten, NULL);
     WriteFile(hPipe, json_buffer, json_len, &bytesWritten, NULL);
+
+    char response[MAX_BUFFER_SIZE];
+    unsigned long bytesRead = 0;
+    ReadFile(hPipe, response, MAX_BUFFER_SIZE, &bytesRead, NULL);
 
     printf(" \tPayload Sent : %s%s%s\n", KGRN, json_buffer, KNRM);
 }
@@ -263,7 +280,7 @@ HANDLE ConnectionDiscord()
     return hipe;
 }
 
-void* EstablishConnection()
+HANDLE EstablishConnection()
 {
     void* connect = NULL;
     int attempts = 10;
@@ -298,16 +315,15 @@ void* EstablishConnection()
     return connect;
 }
 
-void showConnectionStatus(char* process) {
+void showConnectionStatus(char* process)
+{
     if (process != NULL) {
-        printf("\n\t%s[+] Connected to : %s%s%s\n", MAGHB, KGRN, process, KNRM);
-        printf("\n\t%sChoose a process : [1-9 A-F] or : [r]efresh | [s]leep | [q]uit%s\n\n", MAGHB, KNRM);
-    } else {
-        printf("\n\t%sChoose a process : [1-9, A-F] or : [r]efresh | [s]leep | [q]uit%s\n\n", MAGHB, KNRM);
+        printf("\n\t%sConnected to : %s%s%s\n", MAGHB, KGRN, process, KNRM);
     }
 }
 
-void freeProcs(char** procs) {
+void freeProcs(char** procs)
+{
     if (procs == NULL) return;
     for (int i = 0; procs[i] != NULL; i++) {
         free(procs[i]);
@@ -315,64 +331,63 @@ void freeProcs(char** procs) {
     free(procs);
 }
 
-void run(HANDLE connect) {
-    char message[MAX_BUFFER_SIZE];
+void run(HANDLE connect)
+{
+    char details[MAX_BUFFER_SIZE];
     char state[MAX_BUFFER_SIZE];
-    char command = '\0'; // hex
+    char command = 'N';
     char** procs = getProcsNames();
     char* chosenApp = NULL;
     int procCount = 0;
+    bool cleared = false;
+    
     for (int i = 0; procs[i] != NULL; i++) procCount++;
     
-    while (command != 'q') {
+    while (command != 'q')
+    {
+        if (cleared) {
+            UpdatePresence(connect, "todo", "Idle", "");
+            cleared = false;
+        }
+        system("cls");
         showLogo();
         procs = getProcsNames();
+        procCount = 0;
+        for (int i = 0; procs[i] != NULL; i++) procCount++;
         showConnectionStatus(chosenApp);
+        printf("\n\t%sSelect a process : [1-9 A-F] | [r]efresh | [c]lear | [q]uit%s\n\n", MAGHB, KNRM);
         showRunning(procs);
         printf("\t> ");
-        scanf("%c", &command);
+        scanf(" %c", &command);
+        
         if (command == 'r') {
-            freeProcs(procs);
-            printf("\n\t%sProcess list refreshed!%s\n\n", KGRN, KNRM);
-            continue;
-        }
-        else if (command == 'n' || command == 'p') {
-            printf("\tpagination not implemented yet, sorry :(\n");
-        }
-        else if (command >= '1' && command <= '9' && (command - '1') < procCount) {
-            int index = command - '1';
-            if (procs[index] != NULL) {
+            printf("\n\t%sRefreshing...%s\n\n", KGRN, KNRM);
+            Sleep(200);
+        } else if (command == 'c') {
+            chosenApp = NULL;
+            cleared = true;
+            printf("\n\t%sClearing presence...%s\n\n", KGRN, KNRM);
+            Sleep(200);
+        } else if ((command >= '1' && command <= '9') || (command == '0' && procCount > 9) || ((command >= 'A' && command <= 'F') || (command >= 'a' && command <= 'f'))) {
+            int index = -1;
+            
+            if (command >= '1' && command <= '9') {
+                index = command - '1';
+            } else if (command == '0') {
+                index = 9;
+            } else if (command >= 'A' && command <= 'F') {
+                index = command - 'A' + 9;
+            } else if (command >= 'a' && command <= 'f') {
+                index = command - 'a' + 9;
+            }
+            
+            if (index >= 0 && index < procCount && procs[index] != NULL) {
                 chosenApp = procs[index];
-                sprintf(message, "Using %s", chosenApp);
-                sprintf(state, "PID : %ld", GetCurrentProcessId());
-                UpdatePresence(connect, message, state, procs[index]);
+                sprintf(details, "todo :3");
+                sprintf(state, "Using %s", appNameToAssetName(chosenApp));
+                UpdatePresence(connect, details, state, chosenApp);
+                Sleep(500);
             }
-        }
-        else if (command == '0' && 9 < procCount) {
-            if (procs[9] != NULL) {
-                chosenApp = procs[9];
-                sprintf(message, "Using %s", chosenApp);
-                sprintf(state, "PID : %ld", GetCurrentProcessId());
-                UpdatePresence(connect, message, state, chosenApp);
-            }
-        }
-        else if ((command >= 'A' && command <= 'F' && (command - 'A' + 9) < procCount) || (command >= 'a' && command <= 'f' && (command - 'a' + 9) < procCount)) {
-            int index = (command >= 'A' && command <= 'F') ? (command - 'A' + 9) : (command - 'a' + 9);
-            if (procs[index] != NULL) {
-                chosenApp = procs[index];
-                sprintf(message, "Using %s", chosenApp);
-                sprintf(state, "PID : %ld", GetCurrentProcessId());
-                UpdatePresence(connect, message, state, chosenApp);
-            }
-        }
-        else if (command == 's') {
-            chosenApp = "eeping";
-            sprintf(message, "eeping..");
-            sprintf(state, "PID : %ld", GetCurrentProcessId());
-            UpdatePresence(connect, message, state, "sleepy");
-        }
-        else {
-            continue;
         }
     }
     printf("\n\t%sbabaiii :3%s\n\n", KGRN, KNRM);

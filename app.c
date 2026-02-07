@@ -7,13 +7,13 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #elif _WIN32
 /////////////////////////////////////////////////////////////////////////////////////////
-#include ".\src\connection.h"
+#include "connection.h"
 
 int main ()
 {
     SetupConsole();
+    system("cls");
     showLogo();
-    char username[UNLEN+1];
     void* connect = NULL;
     printf("\n\n\n \tConnecting to discord pipe...\n");
     

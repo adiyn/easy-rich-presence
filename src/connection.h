@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef __linux__
@@ -31,12 +32,12 @@
 #include <psapi.h>
 #include <tlhelp32.h>
 
+#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+#endif
+
 #define DIS_PIPE_ADDR       "\\\\.\\pipe\\discord-ipc-0" // memory adress of pipe
 #define MAX_BUFFER_SIZE 4096
-
-static HANDLE stdoutHandle;
-static unsigned int oldCodePage;
-static unsigned long outModeInit;
 
 // shows the logo
 void showLogo(void);
@@ -48,7 +49,7 @@ void RestoreConsole(void);
 void SendHandshake(HANDLE hPipe);
 // checks if the app should be ignored (just dis-rpC itself)
 bool isToBeIgnored(const char* name);
-// checks if a process has a visible window (like Task Manager's "Apps" view)
+// checks if a process has a visible window
 bool hasVisibleWindow(DWORD pid);
 // returns a list of apps with visible windows {"Firefox.exe", "Code.exe", ...}
 char** getProcsNames(void);
@@ -57,7 +58,7 @@ char* appNameToAssetName(const char* appName);
 // shows the list of running apps
 void showRunning(char** procs);
 // update rpc presence 
-void UpdatePresence(HANDLE hPipe, const char* message, const char* state, const char* appName);
+void UpdatePresence(HANDLE hPipe, const char* details, const char* subtitle, const char* appName);
 // connect to discord
 void* ConnectionDiscord(void);
 // establishes connection to discord and returns a handle to the pipe
@@ -66,6 +67,5 @@ void* EstablishConnection(void);
 void freeProcs(char** procs);
 // run app
 void run(HANDLE connect);
-
 #endif
 #endif
