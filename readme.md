@@ -4,7 +4,8 @@ A lightweight C Rich Presence tool for discord with a CLI.
 
 ## Features
 
-* **Cross-Platform:** Designed for Windows (WinAPI) and Linux (Unix Sockets). *Linux part isn't done yet :')*
+* **Cross-Platform:** Designed for Windows (WinAPI) and Linux (Unix Sockets). 
+*Linux part isn't done yet :')*
 
 ## How it works
 
@@ -17,7 +18,8 @@ A lightweight C Rich Presence tool for discord with a CLI.
 
 ## Building from source
 
-  **Requirements:** GCC, Make.
+  **Requirements:** Make, w64devkit (https://github.com/skeeto/w64devkit) or mingw,
+  link with -luser32 -lws2_32 -lshlwapi -lwinmm -lole32 -loleaut32 to compile.
   
   ```bash
   WINDOWS:

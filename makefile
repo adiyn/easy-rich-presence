@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -I./src
+CFLAGS = -Wall -Wextra -I./src -luser32 -lws2_32 -lshlwapi -lwinmm -lole32 -loleaut32
 OBJ = app.o connection.o
 
 all: app

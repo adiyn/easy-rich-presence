@@ -8,9 +8,12 @@
 #elif _WIN32
 /////////////////////////////////////////////////////////////////////////////////////////
 #include "connection.h"
+#include <SDL/SDL2.h>
 
 int main ()
 {
+    
+    
     SetupConsole();
     system("cls");
     showLogo();
