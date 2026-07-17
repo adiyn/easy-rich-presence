@@ -16,17 +16,16 @@ A lightweight C Rich Presence tool for discord with a CLI.
 ### Pre-compiled
  * get the .exe on windows
 
-## Building from source
+## Building from source on Microslop's Windownsyndrome
 
-  **Requirements:** Make, w64devkit (https://github.com/skeeto/w64devkit) or mingw,
-  link with -luser32 -lws2_32 -lshlwapi -lwinmm -lole32 -loleaut32 to compile.
+  **Requirements:** I recommend w64devkit (https://github.com/skeeto/w64devkit) but ig u can do whatever u want
   
   ```bash
   WINDOWS:
     > git clone https://codeberg.org/adiyn/dis-rpC.git
     > cd dis-rpC
     > make
-  run dis-rpC.exe
+  n just run dis-rpC.exe
   ```
 
 
