@@ -9,13 +9,10 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #include "connection.h"
 
-#ifndef DISRPC_USE_SDL
-#define DISRPC_USE_SDL 0
-#endif
-
-#if DISRPC_USE_SDL
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
+
+bool use_sdl = false;
 
 static void showSdlTestWindow(void)
 {
@@ -53,18 +50,24 @@ static void showSdlTestWindow(void)
     SDL_DestroyWindow(window);
     SDL_Quit();
 }
-#else
-static void showSdlTestWindow(void)
-{
-    printf("SDL test window disabled; rebuild with -DDISRPC_USE_SDL=1 and an SDL2 library to enable it.\n");
-}
-#endif
 
-int main ()
+
+int main(int argc, char *argv[])
 {
+    // "-sdl" ?
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-sdl") == 0) {
+            use_sdl = true;
+            break;
+        }
+    }
+
     SetupConsole();
     showLogo();
-    showSdlTestWindow();
+    
+    if (use_sdl) {
+        showSdlTestWindow();
+    }
 
     void* connect = NULL;
     printf("\n\n\n \tConnecting to discord pipe...\n");
@@ -74,8 +77,8 @@ int main ()
     connect = EstablishConnection();
     if (connect == NULL) {
         printf("Connection failure :c\n");
+        RestoreConsole(); 
         return EXIT_FAILURE;
-        RestoreConsole();
     }
     run(connect);
     getchar();

@@ -31,6 +31,7 @@
 #include <tchar.h>
 #include <psapi.h>
 #include <tlhelp32.h>
+#include <conio.h>
 
 #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
 #define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
@@ -38,6 +39,8 @@
 
 #define DIS_PIPE_ADDR       "\\\\.\\pipe\\discord-ipc-0" // memory adress of pipe
 #define MAX_BUFFER_SIZE 4096
+
+extern bool use_sdl;
 
 // shows the logo
 void showLogo(void);

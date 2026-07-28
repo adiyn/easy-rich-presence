@@ -1,26 +1,25 @@
 CC = gcc
-
-# DISRPC_USE_SDL: 0 disabled, 1 enabled, default is 0
-DISRPC_USE_SDL ?= 0
-
-CFLAGS = -Wall -Wextra -I./src
-LDFLAGS = 
-LDLIBS = -lPsapi
-SDL_DLL ?= ./src/SDL2.dll
-
-ifeq ($(DISRPC_USE_SDL),1)
-	CFLAGS += -I"./src" -DDISRPC_USE_SDL=1
-	LDFLAGS += -L"./src"
-	LDLIBS += -lmingw32 -lSDL2main -lSDL2
-endif
-
+CFLAGS = -Wall -Wextra -I"./src" -I"./src/include"
 OBJ = app.o connection.o
 
-all: app
+ifeq ($(OS),Windows_NT) # bleh
+	TARGET = dis-rpC.exe
+	LDFLAGS = -L"./src" -L"./src/lib"
+	LDLIBS = -lPsapi -lmingw32 -lSDL2main -lSDL2
+	SDL_DLL = ./SDL2.dll
+	POST_BUILD = @echo "you good to og"
+else # :D
+	TARGET = dis-rpC
+	LDFLAGS = 
+	LDLIBS = -lSDL2
+	POST_BUILD = @echo "have fun, ig"
+endif
 
-app: $(OBJ)
-	$(CC) $(CFLAGS) -o dis-rpC.exe $(OBJ) $(LDFLAGS) $(LDLIBS)
-	if exist "$(SDL_DLL)" copy /Y "$(SDL_DLL)" . >nul
+all: $(TARGET)
+
+$(TARGET): $(OBJ)
+	$(CC) $(CFLAGS) -o $(TARGET) $(OBJ) $(LDFLAGS) $(LDLIBS)
+	$(POST_BUILD)
 
 app.o: app.c
 	$(CC) $(CFLAGS) -c app.c
@@ -29,18 +28,4 @@ connection.o: connection.c ./src/connection.h
 	$(CC) $(CFLAGS) -c connection.c
 
 clean:
-	rm -f *.o *.exe
-
-
-
-
-
-
-
-
-
-
-
-
-
-# windows is fucking garbage
+	rm -f *.o $(TARGET)

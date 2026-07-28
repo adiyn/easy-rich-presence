@@ -67,6 +67,7 @@ void RestoreConsole(void) {
 
 void SendHandshake(HANDLE hPipe)
 {
+    // json request
     char json_buffer[MAX_BUFFER_SIZE];
     sprintf(json_buffer, "{\"v\": 1, \"client_id\": \"%s\"}", DIS_APP_ID);
     int json_len = strlen(json_buffer);
@@ -75,6 +76,7 @@ void SendHandshake(HANDLE hPipe)
     header.opCode = 0;
     header.opLength = json_len;
 
+    // send it to pipe
     unsigned long bytesWritten;
     WriteFile(hPipe, &header, sizeof(PacketHeader), &bytesWritten, NULL);
     WriteFile(hPipe, json_buffer, json_len, &bytesWritten, NULL);
@@ -103,8 +105,7 @@ static int g_visibleCapacity = 0;
 // windows API garbage
 BOOL CALLBACK EnumWindowsCallback(HWND hwnd, LPARAM lParam)
 {
-    (void)lParam; 
-    // unused
+    (void)lParam; // unused
     if (!IsWindowVisible(hwnd)) return true; 
     // skip invisible windows
     
@@ -198,7 +199,7 @@ char** getProcsNames(void)
 }
 
 char* appNameToAssetName(const char* appName) 
-{
+{ // fuck me
     char* assetName = NULL;
     if (_stricmp(appName, "firefox.exe") == 0) {
         assetName = "firefox";
@@ -243,6 +244,7 @@ void UpdatePresence(HANDLE hPipe, const char* details, const char* subtitle, con
     char json_buffer[MAX_BUFFER_SIZE];
     int APP_PID = GetCurrentProcessId();
     
+    // the format
     sprintf(json_buffer, 
         "{"
             "\"cmd\":\"SET_ACTIVITY\","
@@ -270,8 +272,9 @@ void UpdatePresence(HANDLE hPipe, const char* details, const char* subtitle, con
     PacketHeader header;
     header.opCode = 1;
     header.opLength = json_len;
-    unsigned long bytesWritten;
 	
+    // send it!
+    unsigned long bytesWritten;
     WriteFile(hPipe, &header, sizeof(PacketHeader), &bytesWritten, NULL);
     WriteFile(hPipe, json_buffer, json_len, &bytesWritten, NULL);
 
@@ -333,7 +336,6 @@ HANDLE EstablishConnection()
 
 void showConnectionStatus(char* process)
 {
-    // do i have to explain ?
     if (process != NULL) {
         printf("\n\t%sConnected to : %s%s%s\n", MAGHB, KGRN, process, KNRM);
     }
@@ -376,6 +378,9 @@ void run(HANDLE connect)
         }
         clearConsole();
         showLogo();
+        if (!use_sdl) {
+            printf("\tCLI mode enabled (based); quit & re-run with the '-sdl' argument to use the GUI\n");
+        }
         procs = getProcsNames();
         procCount = 0;
         for (int i = 0; procs[i] != NULL; i++) procCount++;
@@ -383,17 +388,20 @@ void run(HANDLE connect)
         printf("\n\t%sSelect a process : [1-9 A-F] | [r]efresh | [c]lear | [q]uit%s\n\n", MAGHB, KNRM);
         showRunning(procs);
         printf("\t> ");
-        scanf(" %c", &command);
+        command = getch();
         
-        if (command == 'r') {
+        if (command == 'r' || command == 'R') {
             printf("\n\t%sRefreshing...%s\n\n", KGRN, KNRM);
             Sleep(200);
-        } else if (command == 'c') {
+        } else if (command == 'c' || command == 'C') {
             chosenApp = NULL;
             cleared = true;
             printf("\n\t%sClearing presence...%s\n\n", KGRN, KNRM);
             Sleep(200);
-        } else if ((command >= '1' && command <= '9') || (command == '0' && procCount > 9) || ((command >= 'A' && command <= 'F') || (command >= 'a' && command <= 'f'))) {
+        } else if ((command >= '1' && command <= '9')
+         || (command == '0' && procCount > 9)
+          || ((command >= 'A' && command <= 'F')
+           || (command >= 'a' && command <= 'f'))) { // staircase to heaven
             int index = -1;
             
             if (command >= '1' && command <= '9') {
@@ -416,7 +424,9 @@ void run(HANDLE connect)
         }
     }
     printf("\n\t%sbabaiii :3%s\n\n", KGRN, KNRM);
+    clearConsole();
     freeProcs(procs);
+    exit(EXIT_SUCCESS);
 }
 
 #endif
