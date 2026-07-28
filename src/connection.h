@@ -1,10 +1,10 @@
 #ifndef CONNEXION_H
 #define CONNEXION_H 
-#define DIS_APP_ID          "1143261501633867846" // me public app id
-#define KRED                "\x1B[31m" // red
-#define KGRN                "\x1B[32m" // green
-#define MAGHB               "\e[0;105m" // special purble
-#define KNRM                "\x1B[0m" // no
+#define DIS_APP_ID          "1143261501633867846"           // me public app id
+#define KRED                "\x1B[31m"                      // red
+#define KGRN                "\x1B[32m"                      // green
+#define MAGHB               "\e[0;105m"                     // special purble
+#define KNRM                "\x1B[0m"                       // no
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -20,7 +20,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 
-#define DIS_PIPE_ADDR       "$XDG_RUNTIME_DIR/discord-ipc-0" // adress of pipe ??? maybe....
+#define DIS_PIPE_ADDR       "$XDG_RUNTIME_DIR/discord-ipc-0" // memory adress of pipe
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 #elif _WIN32

@@ -20,7 +20,8 @@ static HANDLE stdoutHandle;
 static unsigned int oldCodePage;
 static unsigned long outModeInit;
 
-#pragma pack(push, 1) // ensure no padding in the struct
+#pragma pack(push, 1) 
+// stream must be continuous, no padding
 typedef struct PacketHeader
 {
 	int opCode;
@@ -312,15 +313,14 @@ HANDLE EstablishConnection()
         char* userEnv = getenv("USERNAME");
         if (userEnv) strcpy(username, userEnv);
         else strcpy(username, "GhostUser");
-        printf(" \t%sConnection terminated. I'm sorry to interrupt you '%s%s%s',"
-            "if you still even remember that name. \n"
-            "\t%sIf you still even remember that name. But I'm afraid you've been misinformed.%s\n"
-            "\tYou are not here to receive a gift, nor have you been called here by the individual you assume. \n"
-            "\tAlthough, you have indeed been called. You have all been called here. \n"
-            "\tInto a labyrinth of sounds and smells, misdirection and misfortune. \n"
-            "\tA labyrinth with no exit, a maze with no prize. You don't even realize that you are trapped.\n"
-            "\n \t%sthis is a silly copypasta message, the program failed. (is discord running ?)%s\n\n"
-        , KGRN, KRED, username, KGRN, KNRM, KRED, KNRM, KRED, KNRM); 
+        printf(" \t%sConnection terminated. I'm sorry to interrupt you '%s'%s,\n", KGRN, username, KNRM);
+        printf("\t%sif you still even remember that name.%s\n", KRED, KNRM);
+        printf("\t%sIf you still even remember that name. But I'm afraid you've been misinformed.%s\n", KRED, KNRM);
+        printf("\tYou are not here to receive a gift, nor have you been called here by the individual you assume.\n");
+        printf("\tAlthough, you have indeed been called. You have all been called here.\n");
+        printf("\tInto a labyrinth of sounds and smells, misdirection and misfortune.\n");
+        printf("\tA labyrinth with no exit, a maze with no prize. You don't even realize that you are trapped.\n\n");
+        printf(" \t%sthis is a silly copypasta message, the program failed. (is discord running ?)%s\n\n", KRED, KNRM);
         return NULL;
     }
     
