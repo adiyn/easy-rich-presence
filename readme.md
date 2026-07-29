@@ -31,7 +31,9 @@ A lightweight C Rich Presence tool for discord with a CLI.
 
 ### Roadmap
 
- * turn it into a SDL app and keep the CLI stuff to bare minimum for debugging, keep the logo cuz it's cool duh
+ * CLI /  SDL Hybrid ?
+ * CLI + SDL ?
+ * release a-1.0.0
  * go outside
 
 
