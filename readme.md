@@ -25,7 +25,7 @@ A lightweight C Rich Presence tool for discord with a CLI.
     > git clone https://codeberg.org/adiyn/dis-rpC.git
     > cd dis-rpC
     > make
-  n just run dis-rpC.exe
+  n just run dis-rpC.exe with or without the "-sdl" parameter
   ```
 
 
