@@ -40,5 +40,3 @@ release: $(TARGET)
 	if [ -f "$(SDL_DLL)" ]; then cp -f "$(SDL_DLL)" dist/; fi
 	cp -f readme.md dist/ 2>/dev/null || cp -f README.md dist/ 2>/dev/null || true
 	cp -f LICENCE dist/ 2>/dev/null || cp -f LICENSE dist/ 2>/dev/null || true
-	cd dist && zip -r ../dis-rpC-$(VERSION)-win64.zip .
-	@echo "created dis-rpC-$(VERSION)-win64.zip"
