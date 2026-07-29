@@ -1,6 +1,6 @@
 # dis-rpC !
 
-A lightweight C Rich Presence tool for discord with a CLI.
+A lightweight C Rich Presence tool for discord with a CLI and soon to be GUI !
 
 ## Features
 
