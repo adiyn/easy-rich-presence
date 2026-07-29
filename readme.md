@@ -31,9 +31,9 @@ A lightweight C Rich Presence tool for discord with a CLI.
 
 ### Roadmap
 
- * CLI /  SDL Hybrid ?
- * CLI + SDL ?
- * release a-1.0.0
+ * CLI + SDL user chooses through adding "-sdl" upon manual execution
+ * add a GUI_dis-rpC.exe executable for the windows users to just click open 
+ * initial release 
  * go outside
 
 
