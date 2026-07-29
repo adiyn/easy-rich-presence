@@ -14,7 +14,7 @@ A lightweight C Rich Presence tool for discord with a CLI.
 ## Installation
 
 ### Pre-compiled
- * get the .exe on windows
+ * check releases
 
 ## Building from source on Microslop's Windownsyndrome
 
