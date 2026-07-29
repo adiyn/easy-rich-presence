@@ -288,7 +288,8 @@ void UpdatePresence(HANDLE hPipe, const char* details, const char* subtitle, con
 HANDLE Connect()
 {
     // establish a connection to the Discord IPC pipe
-	HANDLE hipe = CreateFileA(DIS_PIPE_ADDR, GENERIC_READ | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
+	HANDLE hipe = CreateFileA(DIS_PIPE_ADDR, GENERIC_READ
+        | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
 	
 	if (hipe == INVALID_HANDLE_VALUE) {
         return NULL;
@@ -298,7 +299,8 @@ HANDLE Connect()
 
 HANDLE EstablishConnection()
 {
-    // attempt to establish a connection to Discord's IPC pipe, retrying up to 10 times if necessary
+    // attempt to establish a connection to Discord's IPC pipe
+    // retrying up to 10 times if necessary
     void* connect = NULL;
     int attempts = 10;
     
@@ -371,7 +373,7 @@ void run(HANDLE connect)
     for (int i = 0; procs[i] != NULL; i++) procCount++;
     
     while (command != 'q')
-    {
+    { // have fun reading ig
         if (cleared) {
             UpdatePresence(connect, "Zzz...", "", "");
             cleared = false;
