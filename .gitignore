@@ -52,3 +52,7 @@ dkms.conf
 # liberals and incluives
 src/lib/
 src/include/
+
+# Release packages and build output
+dist/
+*.zip
