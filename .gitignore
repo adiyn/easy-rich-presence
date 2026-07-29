@@ -28,6 +28,14 @@
 *.so.*
 *.dylib
 
+# Executables
+*.exe
+*.out
+*.app
+*.i*86
+*.x86_64
+*.hex
+
 # Debug files
 *.dSYM/
 *.su
@@ -48,7 +56,3 @@ dkms.conf
 
 # vscode shit
 .vscode/
-
-# liberals and incluives
-src/lib/
-src/include/
