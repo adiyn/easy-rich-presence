@@ -57,7 +57,7 @@ void SetupConsole()
     if(!SetConsoleMode(stdoutHandle, outMode)) exit(GetLastError());   
 }
 
-/// @brief restores the console to its previous state
+/// @brief restores the console to a void state
 void RestoreConsole() {
     SetConsoleOutputCP(oldCodePage);
     SetConsoleMode(stdoutHandle, outModeInit);
