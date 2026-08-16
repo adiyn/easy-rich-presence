@@ -15,10 +15,11 @@ DisRPC is an RPC tool made in C !
 
 #include "./src/connection.h"
 
-extern DWORD* g_visiblePids = NULL;
-extern int g_visibleCount = 0;
-extern int g_visibleCapacity = 0;
-extern const AppAssetMap APP_MAP[] = {
+HANDLE stdoutHandle;
+unsigned int oldCodePage;
+unsigned long outModeInit;
+
+const AppAssetMap APP_MAP[] = {
     { "firefox.exe",    "firefox"   },
     { "chrome.exe",     "chrome"    },
     { "code.exe",       "vscode"    },
