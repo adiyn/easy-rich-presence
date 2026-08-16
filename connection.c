@@ -15,22 +15,25 @@ DisRPC is an RPC tool made in C !
 
 #include "./src/connection.h"
 
-// windows API garbage
-static HANDLE stdoutHandle;
-static unsigned int oldCodePage;
-static unsigned long outModeInit;
+extern DWORD* g_visiblePids = NULL;
+extern int g_visibleCount = 0;
+extern int g_visibleCapacity = 0;
+extern const AppAssetMap APP_MAP[] = {
+    { "firefox.exe",    "firefox"   },
+    { "chrome.exe",     "chrome"    },
+    { "code.exe",       "vscode"    },
+    { "msedge.exe",     "edge"      },
+    { "discord.exe",    "discord"   },
+    { "w64devkit.exe",  "w64devkit" },
+    { "minecraft.exe",  "minecraft" },
+    { "hytale.exe",     "hytale"    },
+    { "qobuz.exe",      "qobuz"     },
+};
+const size_t APP_MAP_COUNT = sizeof(APP_MAP) / sizeof(APP_MAP[0]);
 
-#pragma pack(push, 1) 
-// stream must be continuous, no padding
-typedef struct PacketHeader
-{
-	int opCode;
-	int opLength;
-} PacketHeader;
-#pragma pack(pop)
-
+/// @brief shows the logo on the terminal
 void showLogo()
-{ // print logo
+{
     printf("\n\n\n");
     printf("\t%s                       ▄▄▄▄▄▄                   ▄▄▄▄▄▄     ▄▄▄▄▄▄    ▄   ▄▄▄▄▄                     %s\n", MAGHB, KNRM);
     printf("\t%s                      █▀██▀▀██                 █▀██▀▀▀█▄  █▀██▀▀▀█▄  ▀████▄▄▄█▀                    %s\n", MAGHB, KNRM);
@@ -40,34 +43,30 @@ void showLogo()
     printf("\t%s                     ▀▀▀▀▀▀▀▀▀  ▀▀▀             ▀▀▀▀  ▀▀▀▀ ▀▀▀▀▀        ▀▀▀▀▀▀                     %s\n", MAGHB, KNRM);
 }
 
-void SetupConsole(void)
-{   // setup console for utf-8 and virtual terminal processing
+/// @brief enables virtual terminal processing to be able to use ASCII escape codes for example
+void SetupConsole()
+{   
     unsigned long outMode = 0x0;
-    
     stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-
-    // save old console state
     oldCodePage = GetConsoleOutputCP();
+    GetConsoleMode(stdoutHandle, &outModeInit);
     if(stdoutHandle == INVALID_HANDLE_VALUE) exit(GetLastError());
     if(!GetConsoleMode(stdoutHandle, &outMode)) exit(GetLastError());
-    
-    // set encoding to utf-8 
     SetConsoleOutputCP(CP_UTF8);
-
-    // enable virtual terminal processing
     outMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
     if(!SetConsoleMode(stdoutHandle, outMode)) exit(GetLastError());   
 }
 
-void RestoreConsole(void) {
-    // Reset console 
+/// @brief restores the console to its previous state
+void RestoreConsole() {
     SetConsoleOutputCP(oldCodePage);
     SetConsoleMode(stdoutHandle, outModeInit);
 }
 
+/// @brief opens a connection to the pipe by sending a json handshake with my discord app id
+/// @param hPipe the HANDLE to the discord ipc pipe
 void SendHandshake(HANDLE hPipe)
 {
-    // json request
     char json_buffer[MAX_BUFFER_SIZE];
     sprintf(json_buffer, "{\"v\": 1, \"client_id\": \"%s\"}", DIS_APP_ID);
     int json_len = strlen(json_buffer);
@@ -76,7 +75,6 @@ void SendHandshake(HANDLE hPipe)
     header.opCode = 0;
     header.opLength = json_len;
 
-    // send it to pipe
     unsigned long bytesWritten;
     WriteFile(hPipe, &header, sizeof(PacketHeader), &bytesWritten, NULL);
     WriteFile(hPipe, json_buffer, json_len, &bytesWritten, NULL);
@@ -85,6 +83,9 @@ void SendHandshake(HANDLE hPipe)
     printf(" \tRequest: %s%s%s\n", KGRN, json_buffer, KNRM);
 }
 
+/// @brief determines whether an app is to be ignored or not by checkign if it's in the ignored list
+/// @param name the name of the app
+/// @return whether app is to be ignored
 bool isToBeIgnored(const char* name)
 {
     const char* ignored[] = {
@@ -97,135 +98,87 @@ bool isToBeIgnored(const char* name)
     return false;
 }
 
-// Store PIDs of processes with visible windows
-static DWORD* g_visiblePids = NULL;
-static int g_visibleCount = 0;
-static int g_visibleCapacity = 0;
-
-// windows API garbage
-BOOL CALLBACK EnumWindowsCallback(HWND hwnd, LPARAM lParam)
+/// @brief enumerates through apps with a visible window
+/// @param hwnd window handle
+/// @param lParam app defined parameter
+/// @return true/false whether to continue the enumeration
+static BOOL CALLBACK EnumWindowsFilter(HWND hwnd, LPARAM lParam)
 {
-    (void)lParam; // unused
-    if (!IsWindowVisible(hwnd)) return true; 
-    // skip invisible windows
-    
-    char title[256];
-    if (GetWindowTextA(hwnd, title, sizeof(title)) == 0) return true; 
-    // skip windows with no title
-    
-    DWORD pid;
-    GetWindowThreadProcessId(hwnd, &pid); 
-    // get PID of the process that owns the window
-    
-    for (int i = 0; i < g_visibleCount; i++) { 
-        // check if PID is already recorded
-        if (g_visiblePids[i] == pid) return true;
-    }
-    
-    if (g_visibleCount >= g_visibleCapacity) {
-        // double the capacity of the array if needed
-        g_visibleCapacity = g_visibleCapacity == 0 ? 64 : g_visibleCapacity * 2;
-        g_visiblePids = realloc(g_visiblePids, g_visibleCapacity * sizeof(DWORD));
-    }
-    g_visiblePids[g_visibleCount++] = pid;
-    
-    return true;
-}
+    AppList* list = (AppList*)lParam;
 
-bool hasVisibleWindow(DWORD pid)
-{
-    for (int i = 0; i < g_visibleCount; i++) {
-        if (g_visiblePids[i] == pid) return true;
-        // check if the given PID has a visible window
+    if (!IsWindowVisible(hwnd)) return true;
+    LONG_PTR exStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+    if (exStyle & WS_EX_TOOLWINDOW) return true;
+    if (GetWindowTextLengthA(hwnd) == 0) return true;
+    RECT rc;
+    if (GetWindowRect(hwnd, &rc)) {
+        if ((rc.right - rc.left) <= 0 || (rc.bottom - rc.top) <= 0) return true;
     }
-    return false;
-}
+    DWORD pid = 0;
+    GetWindowThreadProcessId(hwnd, &pid);
+    if (pid == 0) return true;
 
-char** getProcsNames(void)
-{
-    g_visibleCount = 0;
-    EnumWindows(EnumWindowsCallback, 0);
-    
-    HANDLE hSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-    // NOTE : CreateToolhelp32Snapshot works across 32/64 bit processes unlike EnumProcesses
-    if (hSnapshot == INVALID_HANDLE_VALUE) {
-        // if the snapshot creation fails, print an error and return NULL
-        fprintf(stderr, "CreateToolhelp32Snapshot failed\n");
-        return NULL;
-    }
-    
-    PROCESSENTRY32 pe32;
-    pe32.dwSize = sizeof(PROCESSENTRY32);
-    
-    int totalProcs = 0;
-    if (Process32First(hSnapshot, &pe32)) {
-        do {
-            totalProcs++;
-        } while (Process32Next(hSnapshot, &pe32));
-    }
-    
-    char** procNames = malloc(sizeof(char*) * (totalProcs + 1));
-    if (procNames == NULL) {
-        fprintf(stderr, "go buy RAM smh (alloc error)\n");
-        // what the hell is this error message
-        CloseHandle(hSnapshot);
-        return NULL;
-    }
-    
-    pe32.dwSize = sizeof(PROCESSENTRY32);
-    int count = 0;
-    
-    if (Process32First(hSnapshot, &pe32)) {
-        do {
-            if (hasVisibleWindow(pe32.th32ProcessID) && !isToBeIgnored(pe32.szExeFile)) {
-                int isDupe = 0;
-                for (int j = 0; j < count; j++) {
-                    if (_stricmp(procNames[j], pe32.szExeFile) == 0) {
-                        isDupe = 1;
-                        break;
-                    }
-                }
-                if (!isDupe) {
-                    procNames[count] = strdup(pe32.szExeFile);
-                    count++;
+    HANDLE hProc = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
+    if (!hProc) return true;
+
+    char fullPath[MAX_PATH];
+    DWORD size = sizeof(fullPath);
+    if (QueryFullProcessImageNameA(hProc, 0, fullPath, &size)) {
+        char* exeName = strrchr(fullPath, '\\');
+        exeName = exeName ? exeName + 1 : fullPath;
+
+        if (!isToBeIgnored(exeName)) {
+            bool isDupe = false;
+            for (int i = 0; i < list->count; i++) {
+                if (_stricmp(list->names[i], exeName) == 0) {
+                    isDupe = true;
+                    break;
                 }
             }
-        } while (Process32Next(hSnapshot, &pe32));
+            if (!isDupe) {
+                if (list->count >= list->capacity) {
+                    list->capacity = (list->capacity == 0) ? 16 : list->capacity * 2;
+                    list->names = realloc(list->names, sizeof(char*) * list->capacity);
+                }
+                list->names[list->count++] = _strdup(exeName);
+            }
+        }
     }
-    
-    CloseHandle(hSnapshot);
-    procNames[count] = NULL; // SEGVn't
-    return procNames;
+    CloseHandle(hProc);
+    return TRUE;
 }
 
-char* appNameToAssetName(const char* appName) 
-{ // fuck me
-    char* assetName = NULL;
-    if (_stricmp(appName, "firefox.exe") == 0) {
-        assetName = "firefox";
-    } else if (_stricmp(appName, "chrome.exe") == 0) {
-        assetName = "chrome";
-    } else if (_stricmp(appName, "code.exe") == 0) {
-        assetName = "vscode";
-    } else if (_stricmp(appName, "msedge.exe") == 0) {
-        assetName = "edge";
-    } else if (_stricmp(appName, "discord.exe") == 0) {
-        assetName = "discord";
-    } else if (_stricmp(appName, "w64devkit.exe") == 0) {
-        assetName = "w64devkit";
-    } else if (_stricmp(appName, "minecraft.exe") == 0) {
-        assetName = "minecraft";
-    } else if (_stricmp(appName, "hytale.exe") == 0) {
-        assetName = "hytale";
-    } else {
-        assetName = "default";
-    }
-    return assetName;
+/// @brief returns a list of process names
+/// @return a deduplicated list of proc names that have a visible window
+char** getProcsNames(void)
+{
+    AppList list = { .names = NULL, .count = 0, .capacity = 0 };
+    EnumWindows(EnumWindowsFilter, (LPARAM)&list);
+
+    list.names = realloc(list.names, sizeof(char*) * (list.count + 1));
+    list.names[list.count] = NULL;
+    return list.names;
 }
 
+/// @brief links the appName to the corresponding assetName
+/// @param appName the detected app name as a string
+/// @return the assetName
+const char* appNameToAssetName(const char* appName) 
+{
+    if (!appName) return "default";
+
+    for (size_t i = 0; i < APP_MAP_COUNT; i++) {
+        if (_stricmp(appName, APP_MAP[i].exe) == 0) {
+            return APP_MAP[i].asset;
+        }
+    }
+    return "default";
+}
+
+/// @brief prints the currently running apps on the user's machine
+/// @param procs the list of the currently running procvesses with their names
 void showRunning(char** procs)
 {
-    // print the list of running applications with visible windows
     printf("\tRunning apps :\n");
     int i;
     for (i = 0; i < 15 && procs[i] != NULL; i++) {
@@ -238,13 +191,18 @@ void showRunning(char** procs)
     }
 }
 
+
+/// @brief writes into the ipc pipe the json formatted payload with all the information to be updated
+/// @param hPipe the HANDLE to the discord ipc pipe
+/// @param details discord RPC stuff
+/// @param subtitle discord RPC stuff
+/// @param appName discord RPC stuff
 void UpdatePresence(HANDLE hPipe, const char* details, const char* subtitle, const char* appName)
 {
-    // update the Discord Rich Presence with the given details, subtitle, and application name
     char json_buffer[MAX_BUFFER_SIZE];
     int APP_PID = GetCurrentProcessId();
-    
-    // the format
+    int nonce = rand()%'z';
+
     sprintf(json_buffer, 
         "{"
             "\"cmd\":\"SET_ACTIVITY\","
@@ -265,7 +223,7 @@ void UpdatePresence(HANDLE hPipe, const char* details, const char* subtitle, con
             "},"
             "\"nonce\":%d"
         "}",
-        APP_PID, subtitle, details, appNameToAssetName(appName), appName, rand()%68+1);
+        APP_PID, subtitle, details, appNameToAssetName(appName), appName, nonce);
     
     int json_len = strlen(json_buffer);
     
@@ -273,7 +231,6 @@ void UpdatePresence(HANDLE hPipe, const char* details, const char* subtitle, con
     header.opCode = 1;
     header.opLength = json_len;
 	
-    // send it!
     unsigned long bytesWritten;
     WriteFile(hPipe, &header, sizeof(PacketHeader), &bytesWritten, NULL);
     WriteFile(hPipe, json_buffer, json_len, &bytesWritten, NULL);
@@ -285,9 +242,10 @@ void UpdatePresence(HANDLE hPipe, const char* details, const char* subtitle, con
     printf(" \tPayload Sent : %s%s%s\n", KGRN, json_buffer, KNRM);
 }
 
+/// @brief connects to the discord ipc pipe
+/// @return the HANDLE connected to the ipc pipe
 HANDLE Connect()
 {
-    // establish a connection to the Discord IPC pipe
 	HANDLE hipe = CreateFileA(DIS_PIPE_ADDR, GENERIC_READ
         | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
 	
@@ -297,11 +255,11 @@ HANDLE Connect()
     return hipe;
 }
 
+/// @brief attempts 10 times at most to connect to the ipc pipe
+/// @return the HANDLE connected to discord ipc pipe
 HANDLE EstablishConnection()
 {
-    // attempt to establish a connection to Discord's IPC pipe
-    // retrying up to 10 times if necessary
-    void* connect = NULL;
+    HANDLE connect = NULL;
     int attempts = 10;
     
     do
@@ -313,7 +271,6 @@ HANDLE EstablishConnection()
 
     if (attempts == 0)
     {   
-        // silly FNAF copypasta error message
         char username[UNLEN+1];
         char* userEnv = getenv("USERNAME");
         if (userEnv) strcpy(username, userEnv);
@@ -321,10 +278,10 @@ HANDLE EstablishConnection()
         printf(" \t%sConnection terminated. I'm sorry to interrupt you '%s'%s,\n", KGRN, username, KNRM);
         printf("\t%sif you still even remember that name.%s\n", KRED, KNRM);
         printf("\t%sIf you still even remember that name. But I'm afraid you've been misinformed.%s\n", KRED, KNRM);
-        printf("\tYou are not here to receive a gift, nor have you been called here by the individual you assume.\n");
-        printf("\tAlthough, you have indeed been called. You have all been called here.\n");
-        printf("\tInto a labyrinth of sounds and smells, misdirection and misfortune.\n");
-        printf("\tA labyrinth with no exit, a maze with no prize. You don't even realize that you are trapped.\n\n");
+        printf("\t%sYou are not here to receive a gift, nor have you been called here by the individual you assume.%s\n", KRED, KNRM);
+        printf("\t%sAlthough, you have indeed been called. You have all been called here.%s\n", KRED, KNRM);
+        printf("\t%sInto a labyrinth of sounds and smells, misdirection and misfortune.%s\n", KRED, KNRM);
+        printf("\t%sA labyrinth with no exit, a maze with no prize. You don't even realize that you are trapped.%s\n\n", KRED, KNRM);
         printf(" \t%sthis is a silly copypasta message, the program failed. (is discord running ?)%s\n\n", KRED, KNRM);
         return NULL;
     }
@@ -343,9 +300,10 @@ void showConnectionStatus(char* process)
     }
 }
 
+/// @brief frees the memory
+/// @param procs 
 void freeProcs(char** procs)
 {
-    // SayonaRAM... get it...? haha...
     if (procs == NULL) return;
     for (int i = 0; procs[i] != NULL; i++) {
         free(procs[i]);
@@ -357,11 +315,12 @@ void clearConsole () {
     printf("\033[2J\033[1;1H");
 }
 
+/// @brief main loop for the application, allowing the user to select a process
+// to show in their Discord Rich Presence, refresh the list of processes,
+// clear the presence, or quit the application
+/// @param connect the HANDLE connected to the discord ipc pipe
 void run(HANDLE connect)
 {
-    // main loop for the application, allowing the user to select a process
-    // to show in their Discord Rich Presence, refresh the list of processes,
-    // clear the presence, or quit the application
     char details[MAX_BUFFER_SIZE];
     char state[MAX_BUFFER_SIZE];
     char command = 'N';
@@ -373,7 +332,7 @@ void run(HANDLE connect)
     for (int i = 0; procs[i] != NULL; i++) procCount++;
     
     while (command != 'q')
-    { // have fun reading ig
+    {
         if (cleared) {
             UpdatePresence(connect, "Zzz...", "", "");
             cleared = false;
@@ -383,6 +342,7 @@ void run(HANDLE connect)
         if (!use_sdl) {
             printf("\tCLI mode enabled (based); quit & re-run with the '-sdl' argument to use the GUI\n");
         }
+        freeProcs(procs);
         procs = getProcsNames();
         procCount = 0;
         for (int i = 0; procs[i] != NULL; i++) procCount++;
@@ -403,7 +363,7 @@ void run(HANDLE connect)
         } else if ((command >= '1' && command <= '9')
          || (command == '0' && procCount > 9)
           || ((command >= 'A' && command <= 'F')
-           || (command >= 'a' && command <= 'f'))) { // staircase to heaven
+           || (command >= 'a' && command <= 'f'))) {
             int index = -1;
             
             if (command >= '1' && command <= '9') {
@@ -430,5 +390,4 @@ void run(HANDLE connect)
     freeProcs(procs);
     exit(EXIT_SUCCESS);
 }
-
 #endif
