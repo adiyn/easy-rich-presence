@@ -44,28 +44,30 @@ void showLogo()
     printf("\t%s                     ▀▀▀▀▀▀▀▀▀  ▀▀▀             ▀▀▀▀  ▀▀▀▀ ▀▀▀▀▀        ▀▀▀▀▀▀                     %s\n", MAGHB, KNRM);
 }
 
-/// @brief enables virtual terminal processing to be able to use ASCII escape codes for example
-void SetupConsole()
+/// @brief enables virtual terminal processing to be able to use ASCII escape codes
+void SetupConsole(void)
 {   
     unsigned long outMode = 0x0;
     stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+    if (stdoutHandle == INVALID_HANDLE_VALUE) exit(GetLastError());
+    
     oldCodePage = GetConsoleOutputCP();
-    GetConsoleMode(stdoutHandle, &outModeInit);
-    if(stdoutHandle == INVALID_HANDLE_VALUE) exit(GetLastError());
-    if(!GetConsoleMode(stdoutHandle, &outMode)) exit(GetLastError());
+    if (!GetConsoleMode(stdoutHandle, &outModeInit)) exit(GetLastError());
+    
     SetConsoleOutputCP(CP_UTF8);
-    outMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-    if(!SetConsoleMode(stdoutHandle, outMode)) exit(GetLastError());   
+    outMode = outModeInit | ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    if (!SetConsoleMode(stdoutHandle, outMode)) exit(GetLastError());   
 }
 
-/// @brief restores the console to a void state
-void RestoreConsole() {
+/// @brief restores the console to its initial state
+void RestoreConsole(void) 
+{
     SetConsoleOutputCP(oldCodePage);
     SetConsoleMode(stdoutHandle, outModeInit);
 }
 
 /// @brief opens a connection to the client by sending a handshake request via the pipe
-/// @param hPipe the HANDLE to the discord ipc pipe
+/// @param hPipe the discord ipc pipe handle
 void SendHandshake(HANDLE hPipe)
 {
     char json_buffer[MAX_BUFFER_SIZE];
@@ -80,11 +82,11 @@ void SendHandshake(HANDLE hPipe)
     WriteFile(hPipe, &header, sizeof(PacketHeader), &bytesWritten, NULL);
     WriteFile(hPipe, json_buffer, json_len, &bytesWritten, NULL);
 
-    printf(" \tHandshank request sent ! %s(Opcode: %d, Len: %d)%s\n", KGRN, header.opCode, header.opLength, KNRM);
+    printf(" \tHandshake request sent %s(Opcode: %d, Len: %d)%s\n", KGRN, header.opCode, header.opLength, KNRM);
     printf(" \tRequest: %s%s%s\n", KGRN, json_buffer, KNRM);
 }
 
-/// @brief determines whether an app is to be ignored or not by checkign if it's in the ignored list
+/// @brief determines whether an app is to be ignored or not by checking if it's in the ignored list
 /// @param name the name of the app
 /// @return whether app is to be ignored
 bool isToBeIgnored(const char* name)
@@ -177,7 +179,7 @@ const char* appNameToAssetName(const char* appName)
 }
 
 /// @brief prints the currently running apps on the user's machine
-/// @param procs the list of the currently running procvesses with their names
+/// @param procs the list of process names currently running
 void showRunning(char** procs)
 {
     printf("\tRunning apps :\n");
@@ -247,13 +249,13 @@ void UpdatePresence(HANDLE hPipe, const char* details, const char* subtitle, con
 /// @return the HANDLE connected to the ipc pipe
 HANDLE Connect()
 {
-	HANDLE hipe = CreateFileA(DIS_PIPE_ADDR, GENERIC_READ
+	HANDLE hPipe = CreateFileA(DIS_PIPE_ADDR, GENERIC_READ
         | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
 	
-	if (hipe == INVALID_HANDLE_VALUE) {
+	if (hPipe == INVALID_HANDLE_VALUE) {
         return NULL;
     }
-    return hipe;
+    return hPipe;
 }
 
 /// @brief attempts 10 times at most to connect to the ipc pipe
@@ -294,6 +296,8 @@ HANDLE EstablishConnection()
     return connect;
 }
 
+/// @brief shows current app status with which app it's connected to
+/// @param process the name of the process it's connected to
 void showConnectionStatus(char* process)
 {
     if (process != NULL) {
@@ -302,7 +306,7 @@ void showConnectionStatus(char* process)
 }
 
 /// @brief frees the memory
-/// @param procs 
+/// @param procs the list of process names to free
 void freeProcs(char** procs)
 {
     if (procs == NULL) return;
@@ -312,13 +316,14 @@ void freeProcs(char** procs)
     free(procs);
 }
 
+/// @brief clears the console with ANSI escape codes
 void clearConsole () {
-    printf("\033[2J\033[1;1H");
+    printf("\033[3J\033[H\033[2J");
 }
 
 /// @brief main loop for the application, allowing the user to select a process
-// to show in their Discord Rich Presence, refresh the list of processes,
-// clear the presence, or quit the application
+/// to show in their Discord Rich Presence, refresh the list of processes,
+/// clear the presence, or quit the application
 /// @param connect the HANDLE connected to the discord ipc pipe
 void run(HANDLE connect)
 {
@@ -340,9 +345,6 @@ void run(HANDLE connect)
         }
         clearConsole();
         showLogo();
-        if (!use_sdl) {
-            printf("\tCLI mode enabled (based); quit & re-run with the '-sdl' argument to use the GUI\n");
-        }
         freeProcs(procs);
         procs = getProcsNames();
         procCount = 0;

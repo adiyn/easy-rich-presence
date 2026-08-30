@@ -60,7 +60,6 @@ typedef struct {
     const char* asset;
 } AppAssetMap;
 
-extern bool use_sdl;
 extern HANDLE stdoutHandle;
 extern unsigned int oldCodePage;
 extern unsigned long outModeInit;
