@@ -63,7 +63,7 @@ void RestoreConsole() {
     SetConsoleMode(stdoutHandle, outModeInit);
 }
 
-/// @brief opens a connection to the pipe by sending a json handshake with my discord app id
+/// @brief opens a connection to the client by sending a handshake request via the pipe
 /// @param hPipe the HANDLE to the discord ipc pipe
 void SendHandshake(HANDLE hPipe)
 {
