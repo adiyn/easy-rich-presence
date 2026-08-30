@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
     run(connect);
+    RestoreConsole();
     getchar();
     return EXIT_SUCCESS;
 }

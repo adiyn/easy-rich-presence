@@ -298,9 +298,9 @@ HANDLE EstablishConnection()
 
 /// @brief shows current app status with which app it's connected to
 /// @param process the name of the process it's connected to
-void showConnectionStatus(char* process)
+void showConnectionStatus(const char* process)
 {
-    if (process != NULL) {
+    if (process != NULL && process[0] != '\0') {
         printf("\n\t%sConnected to : %s%s%s\n", MAGHB, KGRN, process, KNRM);
     }
 }
@@ -331,13 +331,13 @@ void run(HANDLE connect)
     char state[MAX_BUFFER_SIZE];
     char command = 'N';
     char** procs = getProcsNames();
-    char* chosenApp = NULL;
+    char chosenApp[MAX_PATH] = "";
     int procCount = 0;
     bool cleared = false;
     
     for (int i = 0; procs[i] != NULL; i++) procCount++;
     
-    while (command != 'q')
+    while (command != 'q' && command != 'Q')
     {
         if (cleared) {
             UpdatePresence(connect, "Zzz...", "", "");
@@ -359,7 +359,7 @@ void run(HANDLE connect)
             printf("\n\t%sRefreshing...%s\n\n", KGRN, KNRM);
             Sleep(200);
         } else if (command == 'c' || command == 'C') {
-            chosenApp = NULL;
+            chosenApp[0] = '\0';
             cleared = true;
             printf("\n\t%sClearing presence...%s\n\n", KGRN, KNRM);
             Sleep(200);
@@ -380,7 +380,9 @@ void run(HANDLE connect)
             }
             
             if (index >= 0 && index < procCount && procs[index] != NULL) {
-                chosenApp = procs[index];
+                strncpy(chosenApp, procs[index], sizeof(chosenApp) - 1);
+                chosenApp[sizeof(chosenApp) - 1] = '\0';
+
                 sprintf(details, "Zzz...");
                 sprintf(state, "Using %s", appNameToAssetName(chosenApp));
                 UpdatePresence(connect, details, state, chosenApp);
@@ -391,6 +393,5 @@ void run(HANDLE connect)
     printf("\n\t%sbabaiii :3%s\n\n", KGRN, KNRM);
     clearConsole();
     freeProcs(procs);
-    exit(EXIT_SUCCESS);
 }
 #endif
