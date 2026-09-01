@@ -321,6 +321,43 @@ void clearConsole () {
     printf("\033[3J\033[H\033[2J");
 }
 
+void processCommand(HANDLE connect, char details[], char state[], char command, char chosenApp[], int procCount, ) {
+    if (command == 'r' || command == 'R') {
+        printf("\n\t%sRefreshing...%s\n\n", KGRN, KNRM);
+        Sleep(200);
+    } else if (command == 'c' || command == 'C') {
+        chosenApp[0] = '\0';
+        cleared = true;
+        printf("\n\t%sClearing presence...%s\n\n", KGRN, KNRM);
+        Sleep(200);
+    } else if ((command >= '1' && command <= '9')
+        || (command == '0' && procCount > 9)
+         || ((command >= 'A' && command <= 'F')
+          || (command >= 'a' && command <= 'f'))) {
+        int index = -1;
+            
+        if (command >= '1' && command <= '9') {
+            index = command - '1';
+        } else if (command == '0') {
+            index = 9;
+        } else if (command >= 'A' && command <= 'F') {
+            index = command - 'A' + 9;
+        } else if (command >= 'a' && command <= 'f') {
+            index = command - 'a' + 9;
+        }
+            
+        if (index >= 0 && index < procCount && procs[index] != NULL) {
+            strncpy(chosenApp, procs[index], sizeof(chosenApp) - 1);
+            chosenApp[sizeof(chosenApp) - 1] = '\0';
+
+            sprintf(details, "Zzz...");
+            sprintf(state, "Using %s", appNameToAssetName(chosenApp));
+            UpdatePresence(connect, details, state, chosenApp);
+            Sleep(500);
+        }
+    }
+}
+
 /// @brief main loop for the application, allowing the user to select a process
 /// to show in their Discord Rich Presence, refresh the list of processes,
 /// clear the presence, or quit the application
@@ -354,41 +391,7 @@ void run(HANDLE connect)
         showRunning(procs);
         printf("\t> ");
         command = getch();
-        
-        if (command == 'r' || command == 'R') {
-            printf("\n\t%sRefreshing...%s\n\n", KGRN, KNRM);
-            Sleep(200);
-        } else if (command == 'c' || command == 'C') {
-            chosenApp[0] = '\0';
-            cleared = true;
-            printf("\n\t%sClearing presence...%s\n\n", KGRN, KNRM);
-            Sleep(200);
-        } else if ((command >= '1' && command <= '9')
-         || (command == '0' && procCount > 9)
-          || ((command >= 'A' && command <= 'F')
-           || (command >= 'a' && command <= 'f'))) {
-            int index = -1;
-            
-            if (command >= '1' && command <= '9') {
-                index = command - '1';
-            } else if (command == '0') {
-                index = 9;
-            } else if (command >= 'A' && command <= 'F') {
-                index = command - 'A' + 9;
-            } else if (command >= 'a' && command <= 'f') {
-                index = command - 'a' + 9;
-            }
-            
-            if (index >= 0 && index < procCount && procs[index] != NULL) {
-                strncpy(chosenApp, procs[index], sizeof(chosenApp) - 1);
-                chosenApp[sizeof(chosenApp) - 1] = '\0';
-
-                sprintf(details, "Zzz...");
-                sprintf(state, "Using %s", appNameToAssetName(chosenApp));
-                UpdatePresence(connect, details, state, chosenApp);
-                Sleep(500);
-            }
-        }
+        processCommand(connect, details, state, command, chosenApp, procCount);
     }
     printf("\n\t%sbabaiii :3%s\n\n", KGRN, KNRM);
     clearConsole();
