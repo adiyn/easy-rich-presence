@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -I"./src"
+CFLAGS = -Wall -Wextra -Werror -I"./src"
 OBJ = app.o connection.o
 
 ifeq ($(OS),Windows_NT) # bleh
