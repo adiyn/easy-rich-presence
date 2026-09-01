@@ -37,6 +37,6 @@ Distributed under the Apache 2.0 License. See LICENSE for more information.
 
 ### Author
 
-  * adiyn, use of GenAI : as tutoring (socratic tutoring)
+  * adiyn, use of GenAI : as tutoring (socratic)
 
 # :3
