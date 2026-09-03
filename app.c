@@ -9,15 +9,10 @@
 /////////////////////////////////////////////////////////////////////////////////////////
 #include "connection.h"
 
-bool use_sdl = false;
-
-int main(int argc, char *argv[])
+int main()
 {
     SetupConsole();
     showLogo();
-    if (use_sdl) {
-        showSdlTestWindow();
-    }
     void* connect = NULL;
     printf("\n\n\n \tConnecting to discord pipe...\n");
     setbuf(stdout, NULL);

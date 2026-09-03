@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdbool.h>
-#include <ctype.h>
+#include <stdint.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef __linux__
@@ -44,8 +44,8 @@
 #pragma pack(push, 1) 
 typedef struct PacketHeader
 {
-	int opCode;
-	int opLength;
+	uint32_t opCode;
+	uint32_t opLength;
 } PacketHeader;
 #pragma pack(pop)
 
@@ -61,8 +61,8 @@ typedef struct {
 } AppAssetMap;
 
 extern HANDLE stdoutHandle;
-extern unsigned int oldCodePage;
-extern unsigned long outModeInit;
+extern uint8_t oldCodePage;
+extern DWORD outModeInit;
 extern const AppAssetMap APP_MAP[];
 extern const size_t APP_MAP_COUNT;
 
@@ -78,7 +78,9 @@ void showRunning(char** procs);
 void UpdatePresence(HANDLE hPipe, const char* details, const char* subtitle, const char* appName);
 void* ConnectionDiscord(void);
 void* EstablishConnection(void);
+bool Disconnect(HANDLE hPipe);
 void freeProcs(char** procs);
-void run(HANDLE connect);
+bool processCommand(HANDLE hPipe, char details[], char subtitle[], char command, char chosenApp[], size_t chosenAppLen, int procCount, char** procs, bool reset);
+void run(HANDLE hPipe);
 #endif
 #endif

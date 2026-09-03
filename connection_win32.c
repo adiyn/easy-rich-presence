@@ -2,22 +2,11 @@
 DisRPC is an RPC tool made in C !
 ₍ᐢ. .ᐢ₎ ₊˚⊹ by @adiyn
 ***/
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef __linux__
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// TODO
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-#elif _WIN32
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 #include "./src/connection.h"
 
 HANDLE stdoutHandle;
-unsigned int oldCodePage;
-unsigned long outModeInit;
+uint8_t oldCodePage;
+DWORD outModeInit;
 
 const AppAssetMap APP_MAP[] = {
     { "firefox.exe",    "firefox"   },
@@ -143,7 +132,14 @@ static BOOL CALLBACK EnumWindowsFilter(HWND hwnd, LPARAM lParam)
                     list->capacity = (list->capacity == 0) ? 16 : list->capacity * 2;
                     list->names = realloc(list->names, sizeof(char*) * list->capacity);
                 }
-                list->names[list->count++] = _strdup(exeName);
+
+                char * dup = _strdup(exeName);
+                if (dup == NULL) {
+                    perror("allocation error : could not dup string\n");
+                }
+                else {
+                    list->names[list->count++] = dup;
+                }
             }
         }
     }
@@ -197,17 +193,16 @@ void showRunning(char** procs)
 
 /// @brief writes into the ipc pipe the json formatted payload with all the information to be updated
 /// @param hPipe the HANDLE to the discord ipc pipe
-/// @param details discord RPC stuff
-/// @param subtitle discord RPC stuff
-/// @param appName discord RPC stuff
+/// @param details discord RPC stuff : details under subtitle
+/// @param subtitle discord RPC stuff : subtitle
+/// @param appName discord RPC stuff : title
 void UpdatePresence(HANDLE hPipe, const char* details, const char* subtitle, const char* appName)
 {
     char json_buffer[MAX_BUFFER_SIZE];
     int APP_PID = GetCurrentProcessId();
     int nonce = rand()%'z';
 
-    sprintf(json_buffer, 
-        "{"
+    char* json_payload = "{"
             "\"cmd\":\"SET_ACTIVITY\","
             "\"args\":{"
                 "\"pid\":%d,"
@@ -225,7 +220,11 @@ void UpdatePresence(HANDLE hPipe, const char* details, const char* subtitle, con
                 "}"
             "},"
             "\"nonce\":%d"
-        "}",
+        "}";
+
+    snprintf(json_buffer, 
+        sizeof(json_buffer),
+        json_payload,
         APP_PID, subtitle, details, appNameToAssetName(appName), appName, nonce);
     
     int json_len = strlen(json_buffer);
@@ -247,7 +246,7 @@ void UpdatePresence(HANDLE hPipe, const char* details, const char* subtitle, con
 
 /// @brief connects to the discord ipc pipe
 /// @return the HANDLE connected to the ipc pipe
-HANDLE Connect()
+HANDLE ConnectionDiscord()
 {
 	HANDLE hPipe = CreateFileA(DIS_PIPE_ADDR, GENERIC_READ
         | GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, NULL);
@@ -262,15 +261,15 @@ HANDLE Connect()
 /// @return the HANDLE connected to discord ipc pipe
 HANDLE EstablishConnection()
 {
-    HANDLE connect = NULL;
+    HANDLE hPipe = NULL;
     int attempts = 10;
     
     do
     {
-        connect = Connect();
+        hPipe = ConnectionDiscord();
         attempts--;
         Sleep(69);
-    } while (connect == NULL && attempts > 0);
+    } while (hPipe == NULL && attempts > 0);
 
     if (attempts == 0)
     {   
@@ -290,10 +289,17 @@ HANDLE EstablishConnection()
     }
     
     printf(" \tConnection established. %s\n", KNRM);
-    SendHandshake(connect);
+    SendHandshake(hPipe);
     Sleep(911); // Jschlatt ???
     printf("\n\n\n \tdis-rpC is %sOnline%s %s(WIP).%s\n\n", KGRN, KNRM, KRED, KNRM);
-    return connect;
+    return hPipe;
+}
+
+/// @brief disconnects
+/// @param hPipe 
+/// @return whether sucessful or not
+bool Disconnect(HANDLE hPipe) {
+    return CloseHandle(hPipe);
 }
 
 /// @brief shows current app status with which app it's connected to
@@ -321,13 +327,22 @@ void clearConsole () {
     printf("\033[3J\033[H\033[2J");
 }
 
-void processCommand(HANDLE connect, char details[], char state[], char command, char chosenApp[], int procCount, ) {
+/// @brief processes the user's input caught via getch()
+/// @param hPipe the handle to discord's pipe
+/// @param details discord RPC stuff : details under subtitle
+/// @param subtitle discord RPC stuff : subtitle
+/// @param command user input
+/// @param chosenApp user chosen app name
+/// @param procCount process count
+/// @param procs process name liste
+/// @param reset whether the process list 
+bool processCommand(HANDLE hPipe, char details[], char subtitle[], char command, char chosenApp[], size_t chosenAppLen, int procCount, char** procs, bool reset) {
     if (command == 'r' || command == 'R') {
         printf("\n\t%sRefreshing...%s\n\n", KGRN, KNRM);
         Sleep(200);
     } else if (command == 'c' || command == 'C') {
         chosenApp[0] = '\0';
-        cleared = true;
+        reset = true;
         printf("\n\t%sClearing presence...%s\n\n", KGRN, KNRM);
         Sleep(200);
     } else if ((command >= '1' && command <= '9')
@@ -347,38 +362,39 @@ void processCommand(HANDLE connect, char details[], char state[], char command, 
         }
             
         if (index >= 0 && index < procCount && procs[index] != NULL) {
-            strncpy(chosenApp, procs[index], sizeof(chosenApp) - 1);
-            chosenApp[sizeof(chosenApp) - 1] = '\0';
+            strncpy(chosenApp, procs[index], chosenAppLen);
+            chosenApp[chosenAppLen-1] = '\0';
 
             sprintf(details, "Zzz...");
-            sprintf(state, "Using %s", appNameToAssetName(chosenApp));
-            UpdatePresence(connect, details, state, chosenApp);
+            sprintf(subtitle, "Using %s", appNameToAssetName(chosenApp));
+            UpdatePresence(hPipe, details, subtitle, chosenApp);
             Sleep(500);
         }
     }
+    return reset;
 }
 
 /// @brief main loop for the application, allowing the user to select a process
 /// to show in their Discord Rich Presence, refresh the list of processes,
 /// clear the presence, or quit the application
-/// @param connect the HANDLE connected to the discord ipc pipe
-void run(HANDLE connect)
+/// @param hPipe the HANDLE connected to the discord ipc pipe
+void run(HANDLE hPipe)
 {
     char details[MAX_BUFFER_SIZE];
-    char state[MAX_BUFFER_SIZE];
+    char subtitle[MAX_BUFFER_SIZE];
     char command = 'N';
     char** procs = getProcsNames();
     char chosenApp[MAX_PATH] = "";
     int procCount = 0;
-    bool cleared = false;
+    bool reset = false;
     
     for (int i = 0; procs[i] != NULL; i++) procCount++;
     
     while (command != 'q' && command != 'Q')
     {
-        if (cleared) {
-            UpdatePresence(connect, "Zzz...", "", "");
-            cleared = false;
+        if (reset) {
+            UpdatePresence(hPipe, "Zzz...", "", "");
+            reset = false;
         }
         clearConsole();
         showLogo();
@@ -391,10 +407,9 @@ void run(HANDLE connect)
         showRunning(procs);
         printf("\t> ");
         command = getch();
-        processCommand(connect, details, state, command, chosenApp, procCount);
+        reset = processCommand(hPipe, details, subtitle, command, chosenApp, sizeof(chosenApp) - 1, procCount, procs, reset);
     }
     printf("\n\t%sbabaiii :3%s\n\n", KGRN, KNRM);
     clearConsole();
     freeProcs(procs);
 }
-#endif
