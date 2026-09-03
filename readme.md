@@ -9,7 +9,7 @@ A lightweight C Rich Presence app in pure C and CLI.
 
 ## How it works
 
-* Connects via the `\\.\pipe\discord-ipc-0` IPC pipe. 
+* Talks to discord thanks to its IPC pipe. 
 
 ## Installation
 
