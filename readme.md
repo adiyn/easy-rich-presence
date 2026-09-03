@@ -28,9 +28,9 @@ A lightweight C Rich Presence app in pure C and CLI.
   ```
 
 ### Roadmap
- * use better C types
+ * fix the various bugs, unsafe code, use better C types. 
  * windows version (to polish)
- * remove the ugly #ifdef \_win32 and \_\_linux__ and instead define variables depending on the os ? 
+ * remove the ugly #ifdef \_win32 and \_\_linux__ giant blocks and instead define variables depending on the os ? 
  * linux version (todo)
  * go outside (todo)
 
