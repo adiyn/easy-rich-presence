@@ -92,7 +92,7 @@ bool isToBeIgnored(const char* name)
 
 /// @brief enumerates through apps with a visible window
 /// @param hwnd window handle
-/// @param lParam app defined parameter
+/// @param lParam the list processes 
 /// @return true/false whether to continue the enumeration
 static BOOL CALLBACK EnumWindowsFilter(HWND hwnd, LPARAM lParam)
 {
