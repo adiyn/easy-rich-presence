@@ -99,12 +99,12 @@ static BOOL CALLBACK EnumWindowsFilter(HWND hwnd, LPARAM lParam)
     AppList* list = (AppList*)lParam;
 
     if (!IsWindowVisible(hwnd)) return true;
-    LONG_PTR exStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
-    if (exStyle & WS_EX_TOOLWINDOW) return true;
+    LONG_PTR extendedStyle = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+    if (extendedStyle & WS_EX_TOOLWINDOW) return true;
     if (GetWindowTextLengthA(hwnd) == 0) return true;
-    RECT rc;
-    if (GetWindowRect(hwnd, &rc)) {
-        if ((rc.right - rc.left) <= 0 || (rc.bottom - rc.top) <= 0) return true;
+    RECT rect;
+    if (GetWindowRect(hwnd, &rect)) {
+        if ((rect.right - rect.left) <= 0 || (rect.bottom - rect.top) <= 0) return true;
     }
     DWORD pid = 0;
     GetWindowThreadProcessId(hwnd, &pid);
@@ -189,7 +189,6 @@ void showRunning(char** procs)
         }
     }
 }
-
 
 /// @brief writes into the ipc pipe the json formatted payload with all the information to be updated
 /// @param hPipe the HANDLE to the discord ipc pipe
