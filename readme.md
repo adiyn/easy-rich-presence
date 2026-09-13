@@ -14,9 +14,9 @@ It reads data from the window titles. Might do more in the future.
 ### Pre-compiled
  * check releases (～￣▽￣)～
 
-## Building from source on Microslop's Windownsyndrome
+## Building from source
 
-  **Requirements:** I recommend w64devkit (https://github.com/skeeto/w64devkit) but ig u can do whatever u want (￣▽￣)
+  **Requirements for microslop:** I recommend w64devkit (https://github.com/skeeto/w64devkit) but ig u can do whatever u want (￣▽￣)
   
   ```bash
     > git clone https://codeberg.org/adiyn/dis-rpC.git
