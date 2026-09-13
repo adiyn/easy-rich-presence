@@ -1,24 +1,22 @@
-# dis-rpC !
+# welcome to easy-discord-presence !
 
-A lightweight C Rich Presence app in pure C and CLI.
+A lightweight C Rich Presence app in pure C (win32 HANDLES and Unix sockets) and fully CLI. 
+It detects the currently running apps on your system and offers you the ability to set them as your current Rich Presence. 
+It reads data from the window titles. Might do more in the future.
 
 ## Features
 
-* **Cross-Platform:** Designed for Windows (WinAPI) and Linux (Unix Sockets). 
-*Linux part isn't done yet :')*
-
-## How it works
-
-* Talks to discord thanks to its IPC pipe. 
+* **Cross-Platform (Macs, Linux & Windows machines)**
+* *Unix part isn't done yet* <(＿　＿)>
 
 ## Installation
 
 ### Pre-compiled
- * check releases
+ * check releases (～￣▽￣)～
 
 ## Building from source on Microslop's Windownsyndrome
 
-  **Requirements:** I recommend w64devkit (https://github.com/skeeto/w64devkit) but ig u can do whatever u want
+  **Requirements:** I recommend w64devkit (https://github.com/skeeto/w64devkit) but ig u can do whatever u want ദ്ദി ˉ͈̀꒳ˉ͈́ )✧
   
   ```bash
   Win / linux:
@@ -37,6 +35,8 @@ Distributed under the Apache 2.0 License. See LICENSE for more information.
 
 ### Author
 
-  * adiyn, use of GenAI : as tutoring (socratic), no code was generated
+  * adiyn
+### AI
+  * use of AI as tutoring so no code was generated
 
-# :3
+# (˶ᵔᗜᵔ˶)ﾉﾞ
