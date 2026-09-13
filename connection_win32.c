@@ -1,7 +1,6 @@
-/***
-DisRPC is an RPC tool made in C !
-₍ᐢ. .ᐢ₎ ₊˚⊹ by @adiyn
-***/
+/// ₍ᐢ. .ᐢ₎ ₊˚⊹
+/// @brief DisRPC is an RPC tool made in C !
+/// @author adiyn
 #include "./src/connection.h"
 
 HANDLE stdoutHandle;
