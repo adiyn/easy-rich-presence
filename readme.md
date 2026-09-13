@@ -16,7 +16,7 @@ It reads data from the window titles. Might do more in the future.
 
 ## Building from source on Microslop's Windownsyndrome
 
-  **Requirements:** I recommend w64devkit (https://github.com/skeeto/w64devkit) but ig u can do whatever u want ദ്ദി ˉ͈̀꒳ˉ͈́ )✧
+  **Requirements:** I recommend w64devkit (https://github.com/skeeto/w64devkit) but ig u can do whatever u want (￣▽￣)
   
   ```bash
   Win / linux:
@@ -39,4 +39,4 @@ Distributed under the Apache 2.0 License. See LICENSE for more information.
 ### AI
   * use of AI as tutoring so no code was generated
 
-# (˶ᵔᗜᵔ˶)ﾉﾞ
+# (˶￣▽￣˶)ﾉ bai bai
