@@ -6,7 +6,7 @@ It reads data from the window titles. Might do more in the future.
 
 ## Features
 
-* **Cross-Platform (Macs, Linux & Windows machines)**
+* **Cross-Platform (Mac, Linux & Windows machines)**
 * *Unix part isn't done yet* <(＿　＿)>
 
 ## Installation
@@ -19,7 +19,6 @@ It reads data from the window titles. Might do more in the future.
   **Requirements:** I recommend w64devkit (https://github.com/skeeto/w64devkit) but ig u can do whatever u want (￣▽￣)
   
   ```bash
-  Win / linux:
     > git clone https://codeberg.org/adiyn/dis-rpC.git
     > cd dis-rpC
     > make
