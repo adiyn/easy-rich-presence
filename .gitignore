@@ -37,10 +37,14 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-# debug information files
+# Debug information files
 *.dwo
 
-# vscode shit
+# Executables / object files
+*.o
+*.exe
+
+# Vscode shit
 .vscode/
 
 # Release packages and build output
