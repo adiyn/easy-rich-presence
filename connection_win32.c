@@ -1,10 +1,10 @@
 /// ₍ᐢ. .ᐢ₎ ₊˚⊹
 /// @brief DisRPC is an RPC tool made in C !
 /// @author adiyn
-#include "./src/connection.h"
+#include "src/connection.h"
 
 HANDLE stdoutHandle;
-uint8_t oldCodePage;
+DWORD oldCodePage;
 DWORD outModeInit;
 
 const AppAssetMap APP_MAP[] = {
@@ -13,9 +13,6 @@ const AppAssetMap APP_MAP[] = {
     { "code.exe",       "vscode"    },
     { "msedge.exe",     "edge"      },
     { "discord.exe",    "discord"   },
-    { "w64devkit.exe",  "w64devkit" },
-    { "minecraft.exe",  "minecraft" },
-    { "hytale.exe",     "hytale"    },
     { "qobuz.exe",      "qobuz"     },
 };
 const size_t APP_MAP_COUNT = sizeof(APP_MAP) / sizeof(APP_MAP[0]);
@@ -33,23 +30,36 @@ void showLogo()
 }
 
 /// @brief enables virtual terminal processing to be able to use ASCII escape codes
-void SetupConsole(void)
+/// @return return success/failure boolean
+bool SetupConsole(void)
 {   
-    unsigned long outMode = 0x0;
+    DWORD outMode = 0x0;
     stdoutHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (stdoutHandle == INVALID_HANDLE_VALUE) exit(GetLastError());
+    if (stdoutHandle == INVALID_HANDLE_VALUE) {
+        return false; 
+    }
     
     oldCodePage = GetConsoleOutputCP();
-    if (!GetConsoleMode(stdoutHandle, &outModeInit)) exit(GetLastError());
+    if (!GetConsoleMode(stdoutHandle, &outModeInit)) {
+        return false;
+    }
     
     SetConsoleOutputCP(CP_UTF8);
     outMode = outModeInit | ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-    if (!SetConsoleMode(stdoutHandle, outMode)) exit(GetLastError());   
+    
+    if (!SetConsoleMode(stdoutHandle, outMode)) {
+        return false;   
+    }   
+    
+    return true;
 }
 
 /// @brief restores the console to its initial state
 void RestoreConsole(void) 
 {
+    if (stdoutHandle == NULL || stdoutHandle == INVALID_HANDLE_VALUE) {
+        return; 
+    }
     SetConsoleOutputCP(oldCodePage);
     SetConsoleMode(stdoutHandle, outModeInit);
 }
@@ -60,7 +70,7 @@ void SendHandshake(HANDLE hPipe)
 {
     char json_buffer[MAX_BUFFER_SIZE];
     sprintf(json_buffer, "{\"v\": 1, \"client_id\": \"%s\"}", DIS_APP_ID);
-    int json_len = strlen(json_buffer);
+    size_t json_len = strlen(json_buffer);
 
     PacketHeader header;
     header.opCode = 0;
@@ -69,7 +79,6 @@ void SendHandshake(HANDLE hPipe)
     unsigned long bytesWritten;
     WriteFile(hPipe, &header, sizeof(PacketHeader), &bytesWritten, NULL);
     WriteFile(hPipe, json_buffer, json_len, &bytesWritten, NULL);
-
     printf(" \tHandshake request sent %s(Opcode: %d, Len: %d)%s\n", KGRN, header.opCode, header.opLength, KNRM);
     printf(" \tRequest: %s%s%s\n", KGRN, json_buffer, KNRM);
 }
@@ -120,7 +129,7 @@ static BOOL CALLBACK EnumWindowsFilter(HWND hwnd, LPARAM lParam)
 
         if (!isToBeIgnored(exeName)) {
             bool isDupe = false;
-            for (int i = 0; i < list->count; i++) {
+            for (size_t i = 0; i < list->count; i++) {
                 if (_stricmp(list->names[i], exeName) == 0) {
                     isDupe = true;
                     break;
@@ -197,10 +206,10 @@ void showRunning(char** procs)
 void UpdatePresence(HANDLE hPipe, const char* details, const char* subtitle, const char* appName)
 {
     char json_buffer[MAX_BUFFER_SIZE];
-    int APP_PID = GetCurrentProcessId();
+    DWORD APP_PID = GetCurrentProcessId();
     int nonce = rand()%'z';
 
-    char* json_payload = "{"
+    const char* json_payload = "{"
             "\"cmd\":\"SET_ACTIVITY\","
             "\"args\":{"
                 "\"pid\":%d,"
@@ -225,7 +234,7 @@ void UpdatePresence(HANDLE hPipe, const char* details, const char* subtitle, con
         json_payload,
         APP_PID, subtitle, details, appNameToAssetName(appName), appName, nonce);
     
-    int json_len = strlen(json_buffer);
+    size_t json_len = strlen(json_buffer);
     
     PacketHeader header;
     header.opCode = 1;
@@ -266,15 +275,22 @@ HANDLE EstablishConnection()
     {
         hPipe = ConnectionDiscord();
         attempts--;
-        Sleep(69);
+        if (hPipe == NULL && attempts > 0) {
+            Sleep(69);
+        }
     } while (hPipe == NULL && attempts > 0);
 
     if (attempts == 0)
     {   
         char username[UNLEN+1];
         char* userEnv = getenv("USERNAME");
-        if (userEnv) strcpy(username, userEnv);
-        else strcpy(username, "GhostUser");
+
+        if (userEnv) {
+            strncpy(username, userEnv, UNLEN);
+        } else {
+            strncpy(username, "GhostUser", UNLEN);
+        }
+
         printf(" \t%sConnection terminated. I'm sorry to interrupt you '%s'%s,\n", KGRN, username, KNRM);
         printf("\t%sif you still even remember that name.%s\n", KRED, KNRM);
         printf("\t%sIf you still even remember that name. But I'm afraid you've been misinformed.%s\n", KRED, KNRM);
@@ -334,7 +350,7 @@ void clearConsole () {
 /// @param procCount process count
 /// @param procs process name liste
 /// @param reset whether the process list 
-bool processCommand(HANDLE hPipe, char details[], char subtitle[], char command, char chosenApp[], size_t chosenAppLen, int procCount, char** procs, bool reset) {
+bool processCommand(HANDLE hPipe, char details[], char subtitle[], int command, char chosenApp[], size_t chosenAppLen, int procCount, char** procs, bool reset) {
     if (command == 'r' || command == 'R') {
         printf("\n\t%sRefreshing...%s\n\n", KGRN, KNRM);
         Sleep(200);
@@ -380,7 +396,7 @@ void run(HANDLE hPipe)
 {
     char details[MAX_BUFFER_SIZE];
     char subtitle[MAX_BUFFER_SIZE];
-    char command = 'N';
+    int command = 'N';
     char** procs = getProcsNames();
     char chosenApp[MAX_PATH] = "";
     int procCount = 0;

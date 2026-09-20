@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -I"./src"
+CFLAGS = -Wall -Wextra -Werror -Wundef -Wpointer-arith -Wshadow -Wwrite-strings -Wconversion -I"./src"
 
 ifeq ($(OS),Windows_NT)
     TARGET = dis-rpC.exe

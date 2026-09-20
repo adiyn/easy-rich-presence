@@ -1,31 +1,23 @@
-/////////////////////////////////////////////////////////////////////////////////////////
-#ifdef __linux__
-/////////////////////////////////////////////////////////////////////////////////////////
+#include "src/connection.h"
 
-// TODO
-
-/////////////////////////////////////////////////////////////////////////////////////////
-#elif _WIN32
-/////////////////////////////////////////////////////////////////////////////////////////
-#include "connection.h"
-
-int main()
+int main(void)
 {
     SetupConsole();
-    showLogo();
-    void* connect = NULL;
-    printf("\n\n\n \tConnecting to discord pipe...\n");
+    
+    atexit(RestoreConsole);
+
     setbuf(stdout, NULL);
     setbuf(stderr, NULL);
-    connect = EstablishConnection();
-    if (connect == NULL) {
-        RestoreConsole(); 
-        return EXIT_FAILURE;
-    }
-    run(connect);
-    RestoreConsole();
-    getchar();
-    return EXIT_SUCCESS;
-}
 
-#endif
+    showLogo();
+    printf("\n\n\n \tConnecting to discord pipe...\n");
+
+    void* connect = EstablishConnection();
+
+    run(connect);
+
+    printf("\nAppuyez sur Entrée pour quitter...");
+    getchar();
+
+    return EXIT_SUCCESS; 
+}

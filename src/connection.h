@@ -1,5 +1,5 @@
 #ifndef CONNEXION_H
-#define CONNEXION_H 
+#define CONNEXION_H
 #define DIS_APP_ID                          "1143261501633867846"
 #define KGRN                                "\x1B[32m"
 #define MAGHB                               "\e[0;105m"
@@ -26,6 +26,12 @@
 #elif _WIN32
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+// >= vista 
+#ifdef _WIN32_WINNT
+    #undef _WIN32_WINNT
+#endif
+#define _WIN32_WINNT                        0x0600
+
 #include <windows.h>
 #include <lmcons.h>
 #include <tchar.h>
@@ -34,25 +40,24 @@
 #include <conio.h>
 
 #ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
-#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+#define ENABLE_VIRTUAL_TERMINAL_PROCESSING  0x0004
 #endif
 
 #define DIS_PIPE_ADDR                       "\\\\.\\pipe\\discord-ipc-0"
 #define MAX_BUFFER_SIZE                     4096
 
-
 #pragma pack(push, 1) 
 typedef struct PacketHeader
 {
 	uint32_t opCode;
-	uint32_t opLength;
+	size_t opLength;
 } PacketHeader;
 #pragma pack(pop)
 
 typedef struct {
     char** names;
-    int count;
-    int capacity;
+    size_t count;
+    size_t capacity;
 } AppList;
 
 typedef struct {
@@ -61,13 +66,13 @@ typedef struct {
 } AppAssetMap;
 
 extern HANDLE stdoutHandle;
-extern uint8_t oldCodePage;
+extern DWORD oldCodePage;
 extern DWORD outModeInit;
 extern const AppAssetMap APP_MAP[];
 extern const size_t APP_MAP_COUNT;
 
 void showLogo(void);
-void SetupConsole(void);
+bool SetupConsole(void);
 void RestoreConsole(void);
 void SendHandshake(HANDLE hPipe);
 bool isToBeIgnored(const char* name);
@@ -80,7 +85,7 @@ void* ConnectionDiscord(void);
 void* EstablishConnection(void);
 bool Disconnect(HANDLE hPipe);
 void freeProcs(char** procs);
-bool processCommand(HANDLE hPipe, char details[], char subtitle[], char command, char chosenApp[], size_t chosenAppLen, int procCount, char** procs, bool reset);
+bool processCommand(HANDLE hPipe, char details[], char subtitle[], int command, char chosenApp[], size_t chosenAppLen, int procCount, char** procs, bool reset);
 void run(HANDLE hPipe);
 #endif
 #endif
