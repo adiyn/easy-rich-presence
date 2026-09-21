@@ -50,14 +50,14 @@
 typedef struct PacketHeader
 {
 	uint32_t opCode;
-	size_t opLength;
+	DWORD opLength;
 } PacketHeader;
 #pragma pack(pop)
 
 typedef struct {
     char** names;
-    size_t count;
-    size_t capacity;
+    DWORD count;
+    DWORD capacity;
 } AppList;
 
 typedef struct {

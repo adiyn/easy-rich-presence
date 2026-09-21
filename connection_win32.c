@@ -70,7 +70,7 @@ void SendHandshake(HANDLE hPipe)
 {
     char json_buffer[MAX_BUFFER_SIZE];
     sprintf(json_buffer, "{\"v\": 1, \"client_id\": \"%s\"}", DIS_APP_ID);
-    size_t json_len = strlen(json_buffer);
+    DWORD json_len = (DWORD) strlen(json_buffer);
 
     PacketHeader header;
     header.opCode = 0;
@@ -79,7 +79,7 @@ void SendHandshake(HANDLE hPipe)
     unsigned long bytesWritten;
     WriteFile(hPipe, &header, sizeof(PacketHeader), &bytesWritten, NULL);
     WriteFile(hPipe, json_buffer, json_len, &bytesWritten, NULL);
-    printf(" \tHandshake request sent %s(Opcode: %d, Len: %d)%s\n", KGRN, header.opCode, header.opLength, KNRM);
+    printf(" \tHandshake request sent %s(Opcode: %d, Len: %ld)%s\n", KGRN, header.opCode, header.opLength, KNRM);
     printf(" \tRequest: %s%s%s\n", KGRN, json_buffer, KNRM);
 }
 
@@ -234,7 +234,7 @@ void UpdatePresence(HANDLE hPipe, const char* details, const char* subtitle, con
         json_payload,
         APP_PID, subtitle, details, appNameToAssetName(appName), appName, nonce);
     
-    size_t json_len = strlen(json_buffer);
+    DWORD json_len = (DWORD) strlen(json_buffer);
     
     PacketHeader header;
     header.opCode = 1;
