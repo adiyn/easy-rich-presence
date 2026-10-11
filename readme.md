@@ -23,8 +23,8 @@ Check the [Releases](releases) tab (～￣▽￣)～
 - Make
 
 ```bash
-git clone [https://codeberg.org/adiyn/dis-rpC.git](https://codeberg.org/adiyn/dis-rpC.git)
-cd dis-rpC
+git clone https://github.com/adiyn/easy-rich-presence
+cd easy-rich-presence
 make
 ```
 ## Roadmap
