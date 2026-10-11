@@ -29,9 +29,9 @@ make
 ```
 ## Roadmap
 
-    [ ] Complete native Linux/Unix socket implementation
-    [ ] Config file support for custom app rules
-    [ ] Go outside
+  - Complete native Linux/Unix socket implementation
+  - Config file support for custom app rules
+  - Go outside
 
 ## License
 
