@@ -36,9 +36,9 @@ make
 ## License
 
 Distributed under the Apache 2.0 License. See LICENSE for details.
-Author
+## Author
 
-    adiyn
+- adiyn
 
 ## AI Disclosure
 - Used AI as a tutoring resource for API references (no code generation).
