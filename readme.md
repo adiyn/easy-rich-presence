@@ -26,3 +26,21 @@ Check the [Releases](releases) tab (～￣▽￣)～
 git clone [https://codeberg.org/adiyn/dis-rpC.git](https://codeberg.org/adiyn/dis-rpC.git)
 cd dis-rpC
 make
+```
+## Roadmap
+
+    [ ] Complete native Linux/Unix socket implementation
+    [ ] Config file support for custom app rules
+    [ ] Go outside
+
+## License
+
+Distributed under the Apache 2.0 License. See LICENSE for details.
+Author
+
+    adiyn
+
+## AI Disclosure
+- Used AI as a tutoring resource for API references (no code generation).
+
+(˶￣▽￣˶)ﾉ bai bai
