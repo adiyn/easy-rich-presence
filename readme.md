@@ -1,41 +1,28 @@
 # welcome to easy-discord-presence !
 
-A lightweight C Rich Presence app in pure C (win32 HANDLES and Unix sockets) and fully CLI. 
-It detects the currently running apps on your system and offers you the ability to set them as your current Rich Presence. 
-It reads data from the window titles. Might do more in the future.
+A lightweight Rich Presence app written in pure C (Win32 handles & Unix sockets) featuring a clean CLI interface.
+
+It detects currently running processes and active window titles to automatically update your Discord status.
 
 ## Features
-
-* **Cross-Platform (Mac, Linux & Windows machines)**
-* *Unix part isn't done yet* <(＿　＿)>
+- Lightweight with zero heavy runtime dependencies.
+- Automatic process/window detection.
+- Multiplatform architecture:
+  - Windows: Fully supported via Win32 API.
+  - Unix systems (Linux / MacOS) : In active development <(＿ ＿)>
 
 ## Installation
 
-### Pre-compiled
- * check releases (～￣▽￣)～
+### Pre-compiled binaries
+Check the [Releases](releases) tab (～￣▽￣)～
 
-## Building from source
+### Building from source
 
-  **Requirements for microslop:** I recommend w64devkit (https://github.com/skeeto/w64devkit) but ig u can do whatever u want (￣▽￣)
-  
-  ```bash
-    > git clone https://codeberg.org/adiyn/dis-rpC.git
-    > cd dis-rpC
-    > make
-  ```
+**Prerequisites:**
+- GCC / MinGW (recommended on Windows: [w64devkit](https://github.com/skeeto/w64devkit))
+- Make
 
-### Roadmap
- * linux version (todo)
- * go outside (todo)
-
-### License
-
-Distributed under the Apache 2.0 License. See LICENSE for more information.
-
-### Author
-
-  * adiyn
-### AI
-  * use of AI as tutoring so no code was generated
-
-# (˶￣▽￣˶)ﾉ bai bai
+```bash
+git clone [https://codeberg.org/adiyn/dis-rpC.git](https://codeberg.org/adiyn/dis-rpC.git)
+cd dis-rpC
+make
